@@ -14,5 +14,5 @@ public abstract class FilterList<F, T extends Filter<F>> {
 		return filters;
 	}
 	
-	public abstract boolean exclude(F type);
+	public abstract NodeFilterListResult exclude(F type);
 }

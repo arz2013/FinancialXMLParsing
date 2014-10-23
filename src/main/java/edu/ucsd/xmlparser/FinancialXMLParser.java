@@ -5,12 +5,16 @@ import java.io.File;
 import javax.xml.parsers.DocumentBuilder; 
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import edu.ucsd.xmlparser.util.NodeUtils;
+import edu.ucsd.xmlparser.util.GraphDatabaseUtils;
 
 public class FinancialXMLParser {	
+	@Autowired
+	private GraphDatabaseUtils graphDatabaseUtils;
+	
 	public FinancialXMLParser() {
 	}
 	
@@ -21,11 +25,12 @@ public class FinancialXMLParser {
 	 * @param file
 	 * @throws Exception
 	 */
-	public void parse(File file) throws Exception {
+	public void parseAndLoad(File file) throws Exception {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		DocumentBuilder db = dbf.newDocumentBuilder(); 
 		Node documentNode = db.parse(file);
-		NodeUtils.printNodeName(documentNode);
+		org.neo4j.graphdb.Node documentGraphNode = graphDatabaseUtils.toGraphNode(documentNode);
+		
 		NodeList children = documentNode.getChildNodes();
 		for(int i = 0; i < children.getLength(); i++) {			
 			Node node = children.item(i);
@@ -41,10 +46,11 @@ public class FinancialXMLParser {
 	 * @param level			- the level of the tree 
 	 */
 	private void visitChildNode(Node childNode, int level) {
-		NodeUtils.printNodeName(childNode);
 		NodeList childrenNodes = childNode.getChildNodes();
 		for(int j = 0; j < childrenNodes.getLength(); j++) {
 			visitChildNode(childrenNodes.item(j), level+1);
 		}
 	}
+	
+	
 }

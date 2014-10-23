@@ -31,12 +31,16 @@ public class GraphDatabaseUtils {
 		graphNode.addLabel(nodeNameLabel);
 		// Associate all the attributes
 		NamedNodeMap xmlNodeAttributes = xmlNode.getAttributes();
-		for(int i = 0; i < xmlNodeAttributes.getLength(); i++) {
-			org.w3c.dom.Node attribute = xmlNodeAttributes.item(i);
-			graphNode.setProperty(attribute.getNodeName(), attribute.getNodeValue());
+		if(xmlNodeAttributes != null) {
+			for(int i = 0; i < xmlNodeAttributes.getLength(); i++) {
+				org.w3c.dom.Node attribute = xmlNodeAttributes.item(i);
+				graphNode.setProperty(attribute.getNodeName(), attribute.getNodeValue());
+			}
 		}
 		// Associate a value even if it's null
-		graphNode.setProperty(NodeAttributes.VALUE.getAttributeName(), xmlNode.getNodeValue());
+		if(xmlNode.getNodeValue() != null) { // Neo4J does not support a property value of "null"
+			graphNode.setProperty(NodeAttributes.VALUE.getAttributeName(), xmlNode.getNodeValue());
+		}
 		
 		return graphNode;
 	}

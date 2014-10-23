@@ -10,14 +10,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import edu.ucsd.xmlparser.dao.GraphDao;
 import edu.ucsd.xmlparser.entity.ApplicationRelationshipType;
 import edu.ucsd.xmlparser.util.GraphDatabaseUtils;
 
 public class FinancialXMLParser {
-	@Autowired
-	private GraphDao graphDao;
-	
 	@Autowired
 	private GraphDatabaseUtils graphDatabaseUtils;
 	
@@ -37,7 +33,6 @@ public class FinancialXMLParser {
 		DocumentBuilder db = dbf.newDocumentBuilder(); 
 		Node documentNode = db.parse(file);
 		org.neo4j.graphdb.Node documentGraphNode = graphDatabaseUtils.toGraphNode(documentNode);
-		graphDao.save(documentGraphNode);
 		visit(documentGraphNode, documentNode);
 	}
 	
@@ -48,18 +43,17 @@ public class FinancialXMLParser {
 		for(int i = 0; i < children.getLength(); i++) {			
 			Node childNode = children.item(i);
 			org.neo4j.graphdb.Node graphChildNode = graphDatabaseUtils.toGraphNode(childNode);
-			graphDao.save(graphChildNode);
 			
 			// Create Relationship(s) between Parent and Child
-			graphDao.save(graphDatabaseUtils.createRelationship(graphNode, graphChildNode, ApplicationRelationshipType.HAS_CHILD));
+			graphDatabaseUtils.createRelationship(graphNode, graphChildNode, ApplicationRelationshipType.HAS_CHILD);
 			// Create a special Relationship if this is the first child processed
 			if(i == 0) {
-				graphDao.save(graphDatabaseUtils.createRelationship(graphNode, graphChildNode, ApplicationRelationshipType.FIRST_CHILD));
+				graphDatabaseUtils.createRelationship(graphNode, graphChildNode, ApplicationRelationshipType.FIRST_CHILD);
 			}
 			
 			// Create Relationship between Siblings
 			if(previousGraphChildNode != null) {
-				graphDao.save(graphDatabaseUtils.createRelationship(previousGraphChildNode, graphChildNode, ApplicationRelationshipType.NEXT));
+				graphDatabaseUtils.createRelationship(previousGraphChildNode, graphChildNode, ApplicationRelationshipType.NEXT);
 			}
 			
 			previousGraphChildNode = graphChildNode;

@@ -4,6 +4,8 @@ import org.neo4j.graphdb.DynamicLabel;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.RelationshipType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.w3c.dom.NamedNodeMap;
 
@@ -37,5 +39,9 @@ public class GraphDatabaseUtils {
 		graphNode.setProperty(NodeAttributes.VALUE.getAttributeName(), xmlNode.getNodeValue());
 		
 		return graphNode;
+	}
+	
+	public Relationship createRelationship(Node start, Node to, RelationshipType hasChild) {
+		return start.createRelationshipTo(to, hasChild);
 	}
 }

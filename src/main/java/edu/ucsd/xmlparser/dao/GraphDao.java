@@ -1,16 +1,20 @@
 package edu.ucsd.xmlparser.dao;
 
-import edu.ucsd.xmlparser.entity.GraphNode;
-import edu.ucsd.xmlparser.entity.GraphRelationship;
+import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Relationship;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.neo4j.support.Neo4jTemplate;
 
 public class GraphDao {
-	// Need to inject a Neo4J Template
-	
-	public void save(GraphNode graphNode) {
-		
+	@Autowired
+	private Neo4jTemplate template;
+
+	public void save(Node graphNode) {
+		template.save(graphNode);
 	}
 	
-	public void save(GraphRelationship graphRelationship) {
-		
+	public void save(Relationship graphRelationship) {
+		template.save(graphRelationship);
 	}
 }

@@ -17,9 +17,11 @@
     <tx:annotation-driven/>
     
     <context:component-scan base-package="edu.ucsd.xmlparser"/>
-    <context:component-scan base-package="edu.ucsd.util"/>
+    <context:component-scan base-package="edu.ucsd.xmlparser.dao"/>
+    <context:component-scan base-package="edu.ucsd.xmlparser.util"/>
     
     <bean name="financialXMLParser" class="edu.ucsd.xmlparser.FinancialXMLParser"/>
+    <bean name="graphDao" class="edu.ucsd.xmlparser.dao.GraphDao"/>
     <bean name="graphDatabaseUtils" class="edu.ucsd.xmlparser.util.GraphDatabaseUtils"/>
     
     <util:map id="config">

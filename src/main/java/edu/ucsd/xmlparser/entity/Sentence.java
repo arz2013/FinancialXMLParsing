@@ -19,6 +19,10 @@ public class Sentence {
 	
 	private String text;
 	
+	// The global sentence number i.e. the sentence number within a document
+	private int documentSNum;
+	
+	// The local sentence number i.e. the sentence number within a paragraph
 	private int sNum;
 	
 	private Set<String> labels = new HashSet<String>();
@@ -55,15 +59,19 @@ public class Sentence {
 		return this.text;
 	}
 	
-	public int getSentenceNumber() {
+	public final int getSentenceNumber() {
 		return this.sNum;
+	}
+	
+	public final int getDocumentSentenceNumber() {
+		return this.documentSNum;
 	}
 	
 	public Set<String> getLabels() {
 		return Collections.unmodifiableSet(labels);
 	}
 
-	public void addLabel(String label) {
+	public final void addLabel(String label) {
 		if (label != null) {
 			labels.add(LabelUtils.createLabel(label));
 		}

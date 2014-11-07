@@ -18,6 +18,12 @@ import edu.ucsd.xmlparser.entity.Sentence;
 import edu.ucsd.xmlparser.entity.SentenceToNonLeafParseNode;
 import edu.ucsd.xmlparser.entity.Word;
 
+/**
+ * Persists the Stanford generated parse tree of sentences
+ * 
+ * @author rogertan
+ *
+ */
 public class StanfordParseTreeSaver {
 	private SentenceDao sentenceDao;
 	private Sentence sentence;

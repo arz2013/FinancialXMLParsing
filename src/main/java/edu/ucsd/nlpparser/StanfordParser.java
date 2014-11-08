@@ -39,8 +39,6 @@ import edu.stanford.nlp.trees.TreeCoreAnnotations.TreeAnnotation;
 import edu.stanford.nlp.util.CoreMap;
 import edu.ucsd.xmlparser.dao.SentenceDao;
 import edu.ucsd.xmlparser.entity.ApplicationRelationshipType;
-import edu.ucsd.xmlparser.entity.Document;
-import edu.ucsd.xmlparser.entity.DocumentToSentence;
 import edu.ucsd.xmlparser.entity.Sentence;
 import edu.ucsd.xmlparser.entity.SpecialTokens;
 import edu.ucsd.xmlparser.entity.Word;
@@ -72,10 +70,12 @@ public class StanfordParser {
 		pipeline = new StanfordCoreNLP(props);
 	}
 	
-	public void parseAndLoad(String text, int noSentence) {
+	public Sentence parseAndLoad(String text, int noSentence) {
 		if(text == null) {
 			throw new IllegalArgumentException("Sentence can not be null");
 		}
+		
+		Sentence newSentence = null;
 
 		// create an empty Annotation just with the given text
 		Annotation document = new Annotation(text);
@@ -101,7 +101,7 @@ public class StanfordParser {
 
 			seenWords.put(root.getTextAndPosition(), root);
 
-			Sentence newSentence = Sentence.newSentence(sentence.get(TextAnnotation.class), noSentence);
+			newSentence = Sentence.newSentence(sentence.get(TextAnnotation.class), noSentence);
 
 			newSentence.addWord(root);
 
@@ -232,6 +232,8 @@ public class StanfordParser {
 
 			}
 		} // if (coreref is not null)
+		
+		return newSentence;
 	}
 	
 	private Node getRepresentativeNode(int sentenceNumber, int startIndex, int endIndex) {

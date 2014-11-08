@@ -5,7 +5,6 @@ import java.util.List;
 import org.neo4j.graphdb.Node;
 
 import edu.ucsd.xmlparser.entity.Document;
-import edu.ucsd.xmlparser.entity.DocumentToSentence;
 import edu.ucsd.xmlparser.entity.NeTags;
 import edu.ucsd.xmlparser.entity.NonLeafParseNode;
 import edu.ucsd.xmlparser.entity.NonLeafToLeaf;
@@ -29,7 +28,6 @@ public interface SentenceDao {
 	public List<Word> getWordsBySentenceText(String text);
 	public String getRelationShip(Long startWordId, Long endWordId);
 	public void save(Document document);
-	public void save(DocumentToSentence documentToSentence);
 	public Document getDocumentByTitleYearAndNumber(String title, int year, int documentNumber);
 	public List<Sentence> getSentencesBasedOnDocument(Long documentId);
 	public List<Word> getWordsWithNeTag(String neTag);

@@ -24,10 +24,14 @@
     <bean name="financialXMLParser" class="edu.ucsd.xmlparser.FinancialXMLParser"/>
     <bean name="graphDao" class="edu.ucsd.xmlparser.dao.GraphDao"/>
     <bean name="graphDatabaseUtils" class="edu.ucsd.xmlparser.util.GraphDatabaseUtils"/>
+    <bean name="stanfordParser" class="edu.ucsd.nlpparser.StanfordParser"/>
+    
+    <bean name="sentenceDao" class="edu.ucsd.xmlparser.dao.NLPNeo4JSentenceDaoImpl"/>
     
     <util:map id="config">
 		<entry key="enable_remote_shell" value="true"/>
 	</util:map>
+	
     <bean id="graphDbFactory" class="org.neo4j.graphdb.factory.GraphDatabaseFactory"/>
 	<bean id="graphDbBuilder" factory-bean="graphDbFactory" factory-method="newEmbeddedDatabaseBuilder">
 		<constructor-arg value="graph.db"/>

@@ -2,20 +2,28 @@ package edu.ucsd.xmlparser;
 
 import java.io.File;
 
+import javax.inject.Inject;
 import javax.xml.parsers.DocumentBuilder; 
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import edu.ucsd.nlpparser.StanfordParser;
 import edu.ucsd.xmlparser.entity.ApplicationRelationshipType;
+import edu.ucsd.xmlparser.entity.NodeName;
+import edu.ucsd.xmlparser.entity.Sentence;
 import edu.ucsd.xmlparser.util.GraphDatabaseUtils;
 
 public class FinancialXMLParser {
-	@Autowired
+	@Inject
 	private GraphDatabaseUtils graphDatabaseUtils;
+	
+	@Inject
+	private StanfordParser stanfordParser;
+	
+	private int sentenceNumber = 0;
 	
 	public FinancialXMLParser() {
 	}
@@ -42,22 +50,44 @@ public class FinancialXMLParser {
 		
 		for(int i = 0; i < children.getLength(); i++) {			
 			Node childNode = children.item(i);
-			org.neo4j.graphdb.Node graphChildNode = graphDatabaseUtils.toGraphNode(childNode);
+			// Check for Paragraph Node for special handling
+			boolean isParagraph = isParagraphTextNode(childNode);
 			
-			// Create Relationship(s) between Parent and Child
-			graphDatabaseUtils.createRelationship(graphNode, graphChildNode, ApplicationRelationshipType.HAS_CHILD);
-			// Create a special Relationship if this is the first child processed
-			if(i == 0) {
-				graphDatabaseUtils.createRelationship(graphNode, graphChildNode, ApplicationRelationshipType.FIRST_CHILD);
+			if(!isParagraph) {
+				org.neo4j.graphdb.Node graphChildNode = graphDatabaseUtils.toGraphNode(childNode);
+
+				// Create Relationship(s) between Parent and Child
+				graphDatabaseUtils.createRelationship(graphNode, graphChildNode, ApplicationRelationshipType.HAS_CHILD);
+				// Create a special Relationship if this is the first child processed
+				if(i == 0) {
+					graphDatabaseUtils.createRelationship(graphNode, graphChildNode, ApplicationRelationshipType.FIRST_CHILD);
+				}
+
+				// Create Relationship between Siblings
+				if(previousGraphChildNode != null) {
+					graphDatabaseUtils.createRelationship(previousGraphChildNode, graphChildNode, ApplicationRelationshipType.NEXT);
+				}
+
+				previousGraphChildNode = graphChildNode;
+				visit(graphChildNode, childNode);
+			} else {
+				Node hashText = childNode.getFirstChild();
+				Sentence sentence = stanfordParser.parseAndLoad(hashText.getNodeValue(), this.sentenceNumber);
+				// graphDatabaseUtils.createRelationship(start, graph, hasChild)
+				this.sentenceNumber++;
 			}
-			
-			// Create Relationship between Siblings
-			if(previousGraphChildNode != null) {
-				graphDatabaseUtils.createRelationship(previousGraphChildNode, graphChildNode, ApplicationRelationshipType.NEXT);
-			}
-			
-			previousGraphChildNode = graphChildNode;
-			visit(graphChildNode, childNode);
 		}
+	}
+
+	/**
+	 * In our PDF document, texts are usually encoded in the following way.
+	 * <P>some text</P>
+	 * 
+	 * @param childNode
+	 * @return
+	 */
+	private boolean isParagraphTextNode(Node childNode) {
+		return NodeName.PARAGRAPH.getTextName().equals(childNode.getNodeName()) && childNode.getChildNodes().getLength() == 1 &&
+				childNode.getFirstChild().getNodeName().equals(NodeName.HASH_TEXT.getTextName());
 	}
 }

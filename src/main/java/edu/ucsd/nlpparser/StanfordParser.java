@@ -52,6 +52,8 @@ public class StanfordParser {
 	private SentenceDao sentenceDao;
 	private Neo4jTemplate template;
 	
+	private StanfordCoreNLP pipeline;
+	
 	@Inject
 	public void setSentenceDao(SentenceDao sentenceDao) {
 		this.sentenceDao = sentenceDao;
@@ -62,179 +64,174 @@ public class StanfordParser {
 		this.template = template;
 	}
 	
-	public void parseAndLoad(List<String> disneyFinancialStatement, Document doc) {
-		if(disneyFinancialStatement == null || doc == null) {
-			throw new IllegalArgumentException("Neither parameters can be null");
-		}
-		
+	public void initiate() {
 		Properties props = new Properties();
-		props.put("annotators", "tokenize, ssplit, pos, lemma, ner, parse, dcoref");
+		props.put("annotators", "tokenize, sspl"
+				+ "it, pos, lemma, ner, parse, dcoref");
 		props.put("dcoref.score", true);
-		StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
-		
-		sentenceDao.save(doc);
-		
-		int noSentence = 0;
+		pipeline = new StanfordCoreNLP(props);
+	}
+	
+	public void parseAndLoad(String text, int noSentence) {
+		if(text == null) {
+			throw new IllegalArgumentException("Sentence can not be null");
+		}
 
-		for(String text : disneyFinancialStatement) {
-			// create an empty Annotation just with the given text
-			Annotation document = new Annotation(text);
+		// create an empty Annotation just with the given text
+		Annotation document = new Annotation(text);
 
-			// run all Annotators on this text
-			pipeline.annotate(document);
+		// run all Annotators on this text
+		pipeline.annotate(document);
 
-			// these are all the sentences in this document
-			// a CoreMap is essentially a Map that uses class objects as keys and has values with custom types
-			List<CoreMap> sentences = document.get(SentencesAnnotation.class);
-		
-			for(CoreMap sentence: sentences) {
-				int wordIndex = 0; 
-				
-				// Maintain a list of words that has already been seen
-				Map<Word.TextAndPosition, Word> seenWords = new HashMap<Word.TextAndPosition, Word>();
-				Word root = Word.newWord(SpecialTokens.ROOT.name(), wordIndex);
+		// these are all the sentences in this document
+		// a CoreMap is essentially a Map that uses class objects as keys and has values with custom types
+		List<CoreMap> sentences = document.get(SentencesAnnotation.class);
+
+		for(CoreMap sentence: sentences) {
+			int wordIndex = 0; 
+
+			// Maintain a list of words that has already been seen
+			Map<Word.TextAndPosition, Word> seenWords = new HashMap<Word.TextAndPosition, Word>();
+			Word root = Word.newWord(SpecialTokens.ROOT.name(), wordIndex);
+			wordIndex++;
+
+			sentenceDao.save(root);
+
+			Node prevNode = template.getNode(root.getId());
+
+			seenWords.put(root.getTextAndPosition(), root);
+
+			Sentence newSentence = Sentence.newSentence(sentence.get(TextAnnotation.class), noSentence);
+
+			newSentence.addWord(root);
+
+			for (CoreLabel token: sentence.get(TokensAnnotation.class)) {
+				// this is the text of the token
+				String word = token.get(TextAnnotation.class);
+				// this is the POS tag of the token
+				String pos = token.get(PartOfSpeechAnnotation.class);
+				// this is the NER label of the token
+				String ne = token.get(NamedEntityTagAnnotation.class);
+
+				Word newWord = Word.newWord(word, wordIndex);
+				newWord.setNameEntityTag(ne);
+				newWord.setPosTag(pos);
+				sentenceDao.save(newWord);
+
+				Node currNode = template.getNode(newWord.getId());
+				template.createRelationshipBetween(prevNode, currNode, ApplicationRelationshipType.NEXT_WORD.name(), new HashMap<String, Object>());
+
+				prevNode = currNode;
+
+				seenWords.put(newWord.getTextAndPosition(), newWord);
+
+				newSentence.addWord(newWord);
+
 				wordIndex++;
-				
-				sentenceDao.save(root);
-				
-				Node prevNode = template.getNode(root.getId());
-				
-				seenWords.put(root.getTextAndPosition(), root);
-				
-				Sentence newSentence = Sentence.newSentence(sentence.get(TextAnnotation.class), noSentence);
-				
-				newSentence.addWord(root);
-				
-				for (CoreLabel token: sentence.get(TokensAnnotation.class)) {
-					// this is the text of the token
-					String word = token.get(TextAnnotation.class);
-					// this is the POS tag of the token
-					String pos = token.get(PartOfSpeechAnnotation.class);
-					// this is the NER label of the token
-					String ne = token.get(NamedEntityTagAnnotation.class);
-					
-					Word newWord = Word.newWord(word, wordIndex);
-					newWord.setNameEntityTag(ne);
-					newWord.setPosTag(pos);
-					sentenceDao.save(newWord);
-					
-					Node currNode = template.getNode(newWord.getId());
-					template.createRelationshipBetween(prevNode, currNode, ApplicationRelationshipType.NEXT_WORD.name(), new HashMap<String, Object>());
-					
-					prevNode = currNode;
-					
-					seenWords.put(newWord.getTextAndPosition(), newWord);
-					
-					newSentence.addWord(newWord);
-					
-					wordIndex++;
-				}
-				
-				sentenceDao.save(newSentence);
-				
-				Node sentenceNode = template.getNode(newSentence.getId());
-				template.createRelationshipBetween(sentenceNode, template.getNode(root.getId()), 
-						ApplicationRelationshipType.FIRST_WORD.name(), new HashMap<String, Object>());
-				
-				// traversing the words in the current sentence
-				// a CoreLabel is a CoreMap with additional token-specific methods
-		
-				sentenceDao.save(new DocumentToSentence(doc, newSentence));
-
-				// this is the parse tree of the current sentence
-				Tree tree = sentence.get(TreeAnnotation.class);
-				// Get dependency tree
-				TreebankLanguagePack tlp = new PennTreebankLanguagePack();
-				GrammaticalStructureFactory gsf = tlp.grammaticalStructureFactory();
-				GrammaticalStructure gs = gsf.newGrammaticalStructure(tree);
-				Collection<TypedDependency> tds = gs.typedDependencies();
-				for(TypedDependency td : tds) {
-					// Check for existence of words
-					Word startWord = getWord(td.gov(), seenWords);
-					Word endWord = getWord(td.dep(), seenWords);
-					
-					WordToWordDependency dependency = new WordToWordDependency(startWord, endWord, td.reln().toString());
-					sentenceDao.save(dependency);
-				}
-				
-				// Now save the parse trees as well
-				StanfordParseTreeSaver spts = new StanfordParseTreeSaver(sentenceDao, template, newSentence, seenWords);
-				spts.performDepthFirstTraversal(tree);
-			
-				noSentence++;
-				seenWords.clear();
 			}
-			
-			// Process coreference
-			Map<Integer, CorefChain> coref = document.get(CorefChainAnnotation.class);
-	        if(coref != null) {
-	        	for(Map.Entry<Integer, CorefChain> entry : coref.entrySet()) {
-	        		CorefChain c = entry.getValue();
-	        		//this is because it prints out a lot of self references which aren't that useful
-	        		
-	        		if(c.getMentionsInTextualOrder().size() <= 1)
-	        			continue;
-					
-	        		CorefMention cm = c.getRepresentativeMention();
-	        		
-	        		String clust = "";
-	        		List<CoreLabel> tks = document.get(SentencesAnnotation.class).get(cm.sentNum-1).get(TokensAnnotation.class);
-	        		if(logger.isDebugEnabled()) {
-	        			logger.debug("Start Index: " + cm.startIndex + " End Index: " + cm.endIndex);
-	        		}
-	        		
-	        		for(int i = cm.startIndex-1; i < cm.endIndex-1; i++) {
-	        			clust += tks.get(i).get(TextAnnotation.class) + " ";
-	        		}
-	        		clust = clust.trim();
-	        		
-	        		if(logger.isDebugEnabled()) {
-	        			logger.debug("representative mention: \"" + clust + "\" is mentioned by:");
-	        		}
-	        		
-	        		logger.info("Representative mention: \"" + clust + "\" in sentence number: " + (cm.sentNum-1) + " is mentioned by:");
-	        		
-	        		Node representativeNode = getRepresentativeNode(cm.sentNum-1, cm.startIndex, cm.endIndex);
-	        		if(logger.isDebugEnabled()) {
-	        			if(representativeNode != null) {
-	        				if(representativeNode.hasProperty("value")) {
-	        					logger.debug("Rep Node Value : " + representativeNode.getProperty("value"));
-	        				} else {
-	        					logger.debug("Rep Node Text : " + representativeNode.getProperty("text"));
-	        				}
-	        			} else {
-	        				logger.debug("Repr Node is somehow null.");
-	        			}
-	        		}
-	        		for(CorefMention m : c.getMentionsInTextualOrder()) {
-	        			String clust2 = "";
-	        			tks = document.get(SentencesAnnotation.class).get(m.sentNum-1).get(TokensAnnotation.class);
-	        			for(int i = m.startIndex-1; i < m.endIndex-1; i++)
-	        				clust2 += tks.get(i).get(TextAnnotation.class) + " ";
-	        			clust2 = clust2.trim();
-	        			//don't need the self mention
-	        			
-	        			if(clust.equals(clust2))
-	        				continue;
-					
-	        			// Not a self reference
-	        			Node mention = getRepresentativeNode(m.sentNum-1, m.startIndex, m.endIndex);
-	        			if(mention != null) {
-	        				if(logger.isDebugEnabled()) {
-	        					if(mention.hasProperty("text")) {
-	        						logger.debug("Mention : " + mention.getProperty("text"));
-	        					} else {
-	        						logger.debug("Mention : " + mention.getProperty("value"));
-	        					}
-	        				}
-	        				template.createRelationshipBetween(mention, representativeNode, ApplicationRelationshipType.REFERS_TO.name(), new HashMap<String, Object>());
-	        			}
-	        			logger.info("\t" + clust2 + " in sentence number: " + (m.sentNum-1));
-	        		}
-	        		
-	        	}
-	        } // if (coreref is not null)
-		} // for (String text: ) 
+
+			sentenceDao.save(newSentence);
+
+			Node sentenceNode = template.getNode(newSentence.getId());
+			template.createRelationshipBetween(sentenceNode, template.getNode(root.getId()), 
+					ApplicationRelationshipType.FIRST_WORD.name(), new HashMap<String, Object>());
+
+			// traversing the words in the current sentence
+			// a CoreLabel is a CoreMap with additional token-specific methods
+
+			// this is the parse tree of the current sentence
+			Tree tree = sentence.get(TreeAnnotation.class);
+			// Get dependency tree
+			TreebankLanguagePack tlp = new PennTreebankLanguagePack();
+			GrammaticalStructureFactory gsf = tlp.grammaticalStructureFactory();
+			GrammaticalStructure gs = gsf.newGrammaticalStructure(tree);
+			Collection<TypedDependency> tds = gs.typedDependencies();
+			for(TypedDependency td : tds) {
+				// Check for existence of words
+				Word startWord = getWord(td.gov(), seenWords);
+				Word endWord = getWord(td.dep(), seenWords);
+
+				WordToWordDependency dependency = new WordToWordDependency(startWord, endWord, td.reln().toString());
+				sentenceDao.save(dependency);
+			}
+
+			// Now save the parse trees as well
+			StanfordParseTreeSaver spts = new StanfordParseTreeSaver(sentenceDao, template, newSentence, seenWords);
+			spts.performDepthFirstTraversal(tree);
+
+			seenWords.clear();
+		}
+
+		// Process coreference
+		Map<Integer, CorefChain> coref = document.get(CorefChainAnnotation.class);
+		if(coref != null) {
+			for(Map.Entry<Integer, CorefChain> entry : coref.entrySet()) {
+				CorefChain c = entry.getValue();
+				//this is because it prints out a lot of self references which aren't that useful
+
+				if(c.getMentionsInTextualOrder().size() <= 1)
+					continue;
+
+				CorefMention cm = c.getRepresentativeMention();
+
+				String clust = "";
+				List<CoreLabel> tks = document.get(SentencesAnnotation.class).get(cm.sentNum-1).get(TokensAnnotation.class);
+				if(logger.isDebugEnabled()) {
+					logger.debug("Start Index: " + cm.startIndex + " End Index: " + cm.endIndex);
+				}
+
+				for(int i = cm.startIndex-1; i < cm.endIndex-1; i++) {
+					clust += tks.get(i).get(TextAnnotation.class) + " ";
+				}
+				clust = clust.trim();
+
+				if(logger.isDebugEnabled()) {
+					logger.debug("representative mention: \"" + clust + "\" is mentioned by:");
+				}
+
+				logger.info("Representative mention: \"" + clust + "\" in sentence number: " + (cm.sentNum-1) + " is mentioned by:");
+
+				Node representativeNode = getRepresentativeNode(cm.sentNum-1, cm.startIndex, cm.endIndex);
+				if(logger.isDebugEnabled()) {
+					if(representativeNode != null) {
+						if(representativeNode.hasProperty("value")) {
+							logger.debug("Rep Node Value : " + representativeNode.getProperty("value"));
+						} else {
+							logger.debug("Rep Node Text : " + representativeNode.getProperty("text"));
+						}
+					} else {
+						logger.debug("Repr Node is somehow null.");
+					}
+				}
+				
+				for(CorefMention m : c.getMentionsInTextualOrder()) {
+					String clust2 = "";
+					tks = document.get(SentencesAnnotation.class).get(m.sentNum-1).get(TokensAnnotation.class);
+					for(int i = m.startIndex-1; i < m.endIndex-1; i++)
+						clust2 += tks.get(i).get(TextAnnotation.class) + " ";
+					clust2 = clust2.trim();
+					//don't need the self mention
+
+					if(clust.equals(clust2))
+						continue;
+
+					// Not a self reference
+					Node mention = getRepresentativeNode(m.sentNum-1, m.startIndex, m.endIndex);
+					if(mention != null) {
+						if(logger.isDebugEnabled()) {
+							if(mention.hasProperty("text")) {
+								logger.debug("Mention : " + mention.getProperty("text"));
+							} else {
+								logger.debug("Mention : " + mention.getProperty("value"));
+							}
+						}
+						template.createRelationshipBetween(mention, representativeNode, ApplicationRelationshipType.REFERS_TO.name(), new HashMap<String, Object>());
+					}
+					logger.info("\t" + clust2 + " in sentence number: " + (m.sentNum-1));
+				}
+
+			}
+		} // if (coreref is not null)
 	}
 	
 	private Node getRepresentativeNode(int sentenceNumber, int startIndex, int endIndex) {

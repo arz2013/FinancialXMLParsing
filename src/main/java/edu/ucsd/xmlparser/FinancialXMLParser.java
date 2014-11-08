@@ -32,7 +32,7 @@ public class FinancialXMLParser {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		DocumentBuilder db = dbf.newDocumentBuilder(); 
 		Node documentNode = db.parse(file);
-		org.neo4j.graphdb.Node documentGraphNode = graphDatabaseUtils.toGraphNode(documentNode);
+		org.neo4j.graphdb.Node documentGraphNode = graphDatabaseUtils.toDocumentGraphNode(documentNode);
 		visit(documentGraphNode, documentNode);
 	}
 	

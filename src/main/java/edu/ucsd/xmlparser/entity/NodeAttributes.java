@@ -1,7 +1,7 @@
 package edu.ucsd.xmlparser.entity;
 
 public enum NodeAttributes {
-	VALUE("nodeValue");
+	VALUE("nodeValue"), ORIGINAL_TAG("originalTag");
 	
 	private String attributeName;
 	

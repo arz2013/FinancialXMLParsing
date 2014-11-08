@@ -9,6 +9,7 @@ import org.neo4j.graphdb.RelationshipType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.w3c.dom.NamedNodeMap;
 
+import edu.ucsd.xmlparser.entity.Document;
 import edu.ucsd.xmlparser.entity.NodeAttributes;
 
 public class GraphDatabaseUtils {
@@ -25,10 +26,21 @@ public class GraphDatabaseUtils {
 	 * @return a Neo4J representation of the XML Node
 	 */
 	public Node toGraphNode(org.w3c.dom.Node xmlNode) {
+		return createNodeWithLabel(xmlNode, DynamicLabel.label(LabelUtils.createLabelFromNodeName(xmlNode.getNodeName())));
+	}
+	
+	public Relationship createRelationship(Node start, Node to, RelationshipType hasChild) {
+		return start.createRelationshipTo(to, hasChild);
+	}
+
+	public org.neo4j.graphdb.Node toDocumentGraphNode(
+			org.w3c.dom.Node documentNode) {
+		return createNodeWithLabel(documentNode, DynamicLabel.label(Document.class.getName()));
+	}
+	
+	private org.neo4j.graphdb.Node createNodeWithLabel(org.w3c.dom.Node xmlNode, Label label) {
 		Node graphNode = graphDatabaseService.createNode();
-		// Associate a Label
-		Label nodeNameLabel = DynamicLabel.label(xmlNode.getNodeName());
-		graphNode.addLabel(nodeNameLabel);
+		graphNode.addLabel(label);
 		// Associate all the attributes
 		NamedNodeMap xmlNodeAttributes = xmlNode.getAttributes();
 		if(xmlNodeAttributes != null) {
@@ -42,10 +54,8 @@ public class GraphDatabaseUtils {
 			graphNode.setProperty(NodeAttributes.VALUE.getAttributeName(), xmlNode.getNodeValue());
 		}
 		
+		graphNode.setProperty(NodeAttributes.ORIGINAL_TAG.getAttributeName(), xmlNode.getNodeName());
+		
 		return graphNode;
-	}
-	
-	public Relationship createRelationship(Node start, Node to, RelationshipType hasChild) {
-		return start.createRelationshipTo(to, hasChild);
 	}
 }

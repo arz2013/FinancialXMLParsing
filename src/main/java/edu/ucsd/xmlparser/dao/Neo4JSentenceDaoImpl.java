@@ -19,6 +19,8 @@ import edu.ucsd.xmlparser.entity.SentenceToNonLeafParseNode;
 import edu.ucsd.xmlparser.entity.SentenceToWord;
 import edu.ucsd.xmlparser.entity.Word;
 import edu.ucsd.xmlparser.entity.WordToWordDependency;
+import edu.ucsd.xmlparser.repository.DocumentRepository;
+import edu.ucsd.xmlparser.repository.SentenceRepository;
 
 public class Neo4JSentenceDaoImpl implements SentenceDao {
 	@Inject

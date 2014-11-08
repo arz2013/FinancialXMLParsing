@@ -11,6 +11,7 @@ import org.w3c.dom.NamedNodeMap;
 
 import edu.ucsd.xmlparser.entity.Document;
 import edu.ucsd.xmlparser.entity.NodeAttributes;
+import edu.ucsd.xmlparser.entity.Sentence;
 
 public class GraphDatabaseUtils {
 	@Autowired
@@ -57,5 +58,9 @@ public class GraphDatabaseUtils {
 		graphNode.setProperty(NodeAttributes.ORIGINAL_TAG.getAttributeName(), xmlNode.getNodeName());
 		
 		return graphNode;
+	}
+
+	public org.neo4j.graphdb.Node getNode(Sentence sentence) {
+		return graphDatabaseService.getNodeById(sentence.getId());
 	}
 }

@@ -73,7 +73,7 @@ public class FinancialXMLParser {
 			} else {
 				Node hashText = childNode.getFirstChild();
 				Sentence sentence = stanfordParser.parseAndLoad(hashText.getNodeValue(), this.sentenceNumber);
-				// graphDatabaseUtils.createRelationship(start, graph, hasChild)
+				graphDatabaseUtils.createRelationship(graphNode, graphDatabaseUtils.getNode(sentence), ApplicationRelationshipType.HAS_CHILD);
 				this.sentenceNumber++;
 			}
 		}

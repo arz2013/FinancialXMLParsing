@@ -1,4 +1,4 @@
-package edu.ucsd.xmlparser.dao;
+package edu.ucsd.xmlparser.repository;
 
 import java.util.List;
 import java.util.Map;

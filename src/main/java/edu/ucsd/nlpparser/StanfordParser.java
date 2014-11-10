@@ -15,6 +15,8 @@ import org.neo4j.kernel.Traversal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.neo4j.support.Neo4jTemplate;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import edu.stanford.nlp.dcoref.CorefChain;
 import edu.stanford.nlp.dcoref.CorefChain.CorefMention;
@@ -70,6 +72,7 @@ public class StanfordParser {
 		pipeline = new StanfordCoreNLP(props);
 	}
 	
+	@Transactional(propagation=Propagation.REQUIRES_NEW)
 	public Sentence parseAndLoad(String text, int noSentence) {
 		if(text == null) {
 			throw new IllegalArgumentException("Sentence can not be null");
@@ -81,7 +84,11 @@ public class StanfordParser {
 		Annotation document = new Annotation(text);
 
 		// run all Annotators on this text
+		long startTime = System.currentTimeMillis();
 		pipeline.annotate(document);
+		long endTime = System.currentTimeMillis();
+		
+		System.out.println("Stanford Parsing takes : " + (endTime - startTime) + " ms");
 
 		// these are all the sentences in this document
 		// a CoreMap is essentially a Map that uses class objects as keys and has values with custom types

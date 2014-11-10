@@ -6,6 +6,8 @@ import javax.inject.Inject;
 import javax.xml.parsers.DocumentBuilder; 
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -24,6 +26,8 @@ public class FinancialXMLParser {
 	private StanfordParser stanfordParser;
 	
 	private int sentenceNumber = 0;
+	
+	private static Logger logger = LoggerFactory.getLogger(FinancialXMLParser.class);
 	
 	public FinancialXMLParser() {
 	}
@@ -72,6 +76,7 @@ public class FinancialXMLParser {
 				visit(graphChildNode, childNode);
 			} else {
 				Node hashText = childNode.getFirstChild();
+				System.out.println("Sentence Number : " + this.sentenceNumber + " with value : " + hashText.getNodeValue());
 				Sentence sentence = stanfordParser.parseAndLoad(hashText.getNodeValue(), this.sentenceNumber);
 				graphDatabaseUtils.createRelationship(graphNode, graphDatabaseUtils.getNode(sentence), ApplicationRelationshipType.HAS_CHILD);
 				this.sentenceNumber++;

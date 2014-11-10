@@ -14,7 +14,7 @@
      					   http://www.springframework.org/schema/util/spring-util.xsd
 					       http://www.springframework.org/schema/tx
      					   http://www.springframework.org/schema/tx/spring-tx.xsd">
-    <neo4j:config graphDatabaseService="graphDatabaseService"/>
+    <neo4j:config graphDatabaseService="graphDatabaseService" base-package="edu.ucsd.xmlparser.entity"/>
     <neo4j:repositories base-package="edu.ucsd.xmlparser.repository"/>
     <tx:annotation-driven/>
     

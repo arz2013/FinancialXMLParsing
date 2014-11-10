@@ -65,8 +65,8 @@ public class StanfordParser {
 	public void initiate() {
 		Properties props = new Properties();
 		props.put("annotators", "tokenize, sspl"
-				+ "it, pos, lemma, ner, parse, dcoref");
-		props.put("dcoref.score", true);
+				+ "it, pos, lemma, ner, parse"); // Remove dcoref
+		// props.put("dcoref.score", true);
 		pipeline = new StanfordCoreNLP(props);
 	}
 	

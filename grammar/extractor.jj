@@ -1,11 +1,14 @@
 /* adder.jj Adding up numbers */
 options {
 	STATIC = false;
+	LOOKAHEAD = 3;
 }
 
 PARSER_BEGIN(QueryParser)
 
 package edu.ucsd;
+
+import edu.ucsd.grammar.ForClause;
 
 	public class QueryParser {
 		public static void main(String[] args) 
@@ -62,10 +65,18 @@ TOKEN : { < KWFOR : "for" > }
 TOKEN : { < #LETTER : ["a"-"z", "A"-"Z"] > } 
 TOKEN : { < #DIGIT : (["0"-"9"])+ > }
 /* The Identifier Types have to appear before the more generic Identifier
-   otherwise it will match Identifier first before Identifier Types */
+   otherwise it will match Identifier first before Identifier Types 
+   so more specific ones have to appear first */
+TOKEN : { < FUNCTION : ("shortest_term_starting_with" | "longest_term_containing")  > }
+TOKEN : { < WHERE_CLAUSE_CONNECTOR : ( "or" | "and" ) > }
+TOKEN : { < NOT : "not" > }
 TOKEN : { < IDENTIFIER_TYPES : ("Word" | "Sentence" | "Document") > }
 TOKEN : { < IDENTIFIER : (<LETTER> | "_") (<LETTER> | <DIGIT> | "_")* > }
 TOKEN : { < IDENTIFIER_TYPE_SEPARATOR : ":" > }
+TOKEN : { < VARIABLE_ASSIGNMENT : "=" > }
+TOKEN : { < OPEN_PAR : "(" > }
+TOKEN : { < CLOSE_PAR : ")" > }
+TOKEN : { < CLAUSE_SEPARATOR : "," > }
 /* TOKEN : { < VAR_TYPE_DECLARATION : (<IDENTIFIER> ":" ("Word" | "Sentence" | "Document" > ) } */
 
 /* Parser */
@@ -79,16 +90,45 @@ void start() :
 
 void FOR_CLAUSE() :
 {
-	Token t;
 }
 {
-	(t = <KWFOR>)
-	{ System.out.println(t.image); }	
+	<KWFOR>
+	/* The "(" and ")" are necessary otherwise early exit */
+	(IDENTIFIER_TYPE_DECLARATION() | VARIABLE_ASSIGNMENT())
+	( 
+		<CLAUSE_SEPARATOR>
+		(IDENTIFIER_TYPE_DECLARATION() | VARIABLE_ASSIGNMENT())
+	)*
+}
+
+void IDENTIFIER_TYPE_DECLARATION() :
+{
+	Token t;
+}
+{	
 	(t = <IDENTIFIER>)
 	{ System.out.println(t.image); }
 	<IDENTIFIER_TYPE_SEPARATOR>
 	(t = <IDENTIFIER_TYPES>)
 	{ System.out.println(t.image); } 
 }
+
+void VARIABLE_ASSIGNMENT() :
+{
+	Token t;
+}
+{
+	(t = <IDENTIFIER>)
+	{ System.out.println(t.image); }
+	<VARIABLE_ASSIGNMENT>
+	(t = <FUNCTION>)
+	{ System.out.println(t.image); }
+	<OPEN_PAR>
+	(t = <IDENTIFIER>)
+        { System.out.println(t.image); }
+	<CLOSE_PAR>
+}
+
+
 
 

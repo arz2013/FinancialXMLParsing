@@ -1,0 +1,94 @@
+/* adder.jj Adding up numbers */
+options {
+	STATIC = false;
+}
+
+PARSER_BEGIN(QueryParser)
+
+package edu.ucsd;
+
+	public class QueryParser {
+		public static void main(String[] args) 
+		throws ParseException, TokenMgrError {
+			QueryParser queryParser = new QueryParser( System.in );
+			queryParser.start(); }
+	}
+
+
+	class VariableDeclaration implements ForClause {
+		private String variableName;
+		private String variableType;
+
+		public VariableDeclaration(String variableName, String variableType) {
+			this.variableName = variableName;
+			this.variableType = variableType;
+		}
+
+		public String getVariableName() {
+			return this.variableName;
+		}
+
+		public String getVariableType() {
+			return this.variableType;
+		}	
+	}
+
+	class VariableAssignment implements ForClause {
+		private String variableName;
+		private String variableXpressionAssignment;
+		
+		public VariableAssignment(String variableName, String variableXpressionAssignment) {
+			this.variableName = variableName;
+			this.variableXpressionAssignment = variableXpressionAssignment;
+		}
+
+		public String getVariableName() {
+			return this.variableName;
+		}
+
+		public String getVariableXpressionAssignment() {
+			return this.variableXpressionAssignment;
+		}
+			
+	}
+
+PARSER_END(QueryParser)
+
+/* Lexical Analyzer */
+SKIP : { " " }
+SKIP : { "\n" | "\r" | "\r\n" }
+
+TOKEN : { < KWFOR : "for" > }
+TOKEN : { < #LETTER : ["a"-"z", "A"-"Z"] > } 
+TOKEN : { < #DIGIT : (["0"-"9"])+ > }
+/* The Identifier Types have to appear before the more generic Identifier
+   otherwise it will match Identifier first before Identifier Types */
+TOKEN : { < IDENTIFIER_TYPES : ("Word" | "Sentence" | "Document") > }
+TOKEN : { < IDENTIFIER : (<LETTER> | "_") (<LETTER> | <DIGIT> | "_")* > }
+TOKEN : { < IDENTIFIER_TYPE_SEPARATOR : ":" > }
+/* TOKEN : { < VAR_TYPE_DECLARATION : (<IDENTIFIER> ":" ("Word" | "Sentence" | "Document" > ) } */
+
+/* Parser */
+void start() :
+{
+}
+{
+	FOR_CLAUSE()
+	<EOF>
+}
+
+void FOR_CLAUSE() :
+{
+	Token t;
+}
+{
+	(t = <KWFOR>)
+	{ System.out.println(t.image); }	
+	(t = <IDENTIFIER>)
+	{ System.out.println(t.image); }
+	<IDENTIFIER_TYPE_SEPARATOR>
+	(t = <IDENTIFIER_TYPES>)
+	{ System.out.println(t.image); } 
+}
+
+

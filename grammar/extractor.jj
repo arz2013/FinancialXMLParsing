@@ -14,7 +14,7 @@ import edu.ucsd.grammar.ForClause;
 		public static void main(String[] args) 
 		throws ParseException, TokenMgrError {
 			QueryParser queryParser = new QueryParser( System.in );
-			queryParser.start(); }
+			queryParser.parse(); }
 	}
 
 
@@ -62,11 +62,15 @@ SKIP : { " " }
 SKIP : { "\n" | "\r" | "\r\n" }
 
 TOKEN : { < KWFOR : "for" > }
+TOKEN : { < KWWHERE : "where" > }
+TOKEN : { < KWRETURN : "return" > }
 TOKEN : { < #LETTER : ["a"-"z", "A"-"Z"] > } 
 TOKEN : { < #DIGIT : (["0"-"9"])+ > }
+TOKEN : { < WORD : "'"(["a"-"z", "A"-"Z", "0"-"9", "_"])+"'" > }
 /* The Identifier Types have to appear before the more generic Identifier
    otherwise it will match Identifier first before Identifier Types 
    so more specific ones have to appear first */
+TOKEN : { < DOC_AND_SENTENCE_FUNCTION : "."("contains") > }
 TOKEN : { < FUNCTION : ("shortest_term_starting_with" | "longest_term_containing")  > }
 TOKEN : { < WHERE_CLAUSE_CONNECTOR : ( "or" | "and" ) > }
 TOKEN : { < NOT : "not" > }
@@ -80,11 +84,13 @@ TOKEN : { < CLAUSE_SEPARATOR : "," > }
 /* TOKEN : { < VAR_TYPE_DECLARATION : (<IDENTIFIER> ":" ("Word" | "Sentence" | "Document" > ) } */
 
 /* Parser */
-void start() :
+void parse() :
 {
 }
 {
 	FOR_CLAUSE()
+	WHERE_CLAUSE()
+	RETURN_CLAUSE()
 	<EOF>
 }
 
@@ -99,6 +105,27 @@ void FOR_CLAUSE() :
 		<CLAUSE_SEPARATOR>
 		(IDENTIFIER_TYPE_DECLARATION() | VARIABLE_ASSIGNMENT())
 	)*
+}
+
+void WHERE_CLAUSE() :
+{
+}
+{
+	<KWWHERE>
+	(WORD_CONSTRAINT() | CONTAINS_CONSTRAINT())
+	(<WHERE_CLAUSE_CONNECTOR>
+	 (WORD_CONSTRAINT() | CONTAINS_CONSTRAINT())
+	)*
+}
+
+void RETURN_CLAUSE() :
+{
+	Token t;
+}
+{
+	<KWRETURN>
+	(t = <IDENTIFIER>)
+	{ System.out.println(t.image); }
 }
 
 void IDENTIFIER_TYPE_DECLARATION() :
@@ -129,6 +156,29 @@ void VARIABLE_ASSIGNMENT() :
 	<CLOSE_PAR>
 }
 
+void WORD_CONSTRAINT() : 
+{
+	Token t;
+}
+{
+	(t = <IDENTIFIER>)
+	{System.out.println(t.image);}
+	<VARIABLE_ASSIGNMENT>
+	(t = <WORD>)
+	{System.out.println(t.image);} 
+}
 
-
+void CONTAINS_CONSTRAINT() :
+{
+	Token t;
+}
+{
+	(t = <IDENTIFIER>)
+	{System.out.println(t.image);}
+	<DOC_AND_SENTENCE_FUNCTION>
+	<OPEN_PAR>
+	(t = <IDENTIFIER>)
+	{System.out.println(t.image);}
+	<CLOSE_PAR>
+}
 

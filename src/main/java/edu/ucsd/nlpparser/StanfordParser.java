@@ -46,6 +46,7 @@ import edu.ucsd.xmlparser.entity.SpecialTokens;
 import edu.ucsd.xmlparser.entity.Word;
 import edu.ucsd.xmlparser.entity.WordToWordDependency;
 
+@SuppressWarnings("deprecation")
 public class StanfordParser {
 	private static Logger logger = LoggerFactory.getLogger(StanfordParser.class);
 	

@@ -76,10 +76,14 @@ public class FinancialXMLParser {
 				visit(graphChildNode, childNode);
 			} else {
 				Node hashText = childNode.getFirstChild();
-				System.out.println("Sentence Number : " + this.sentenceNumber + " with value : " + hashText.getNodeValue());
-				Sentence sentence = stanfordParser.parseAndLoad(hashText.getNodeValue(), this.sentenceNumber);
-				graphDatabaseUtils.createRelationship(graphNode, graphDatabaseUtils.getNode(sentence), ApplicationRelationshipType.HAS_CHILD);
-				this.sentenceNumber++;
+				logger.info("Sentence Number : " + this.sentenceNumber + " with value : " + hashText.getNodeValue());
+				String rawSentence = hashText.getNodeValue();
+				// IMPORTANT, this isn't a hard and fast rule, more like a hack for now
+				if(!(rawSentence.startsWith("% Change") && rawSentence.length() > 30 )) {
+					Sentence sentence = stanfordParser.parseAndLoad(hashText.getNodeValue(), this.sentenceNumber);
+					graphDatabaseUtils.createRelationship(graphNode, graphDatabaseUtils.getNode(sentence), ApplicationRelationshipType.HAS_CHILD);
+					this.sentenceNumber++;
+				}
 			}
 		}
 	}

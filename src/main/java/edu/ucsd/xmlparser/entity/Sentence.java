@@ -7,8 +7,10 @@ import java.util.Set;
 import org.neo4j.graphdb.Direction;
 import org.springframework.data.neo4j.annotation.Fetch;
 import org.springframework.data.neo4j.annotation.GraphId;
+import org.springframework.data.neo4j.annotation.Indexed;
 import org.springframework.data.neo4j.annotation.NodeEntity;
 import org.springframework.data.neo4j.annotation.RelatedToVia;
+import org.springframework.data.neo4j.support.index.IndexType;
 
 import edu.ucsd.xmlparser.util.LabelUtils;
 
@@ -17,6 +19,7 @@ public class Sentence {
 	@GraphId
 	private Long id;
 	
+	@Indexed(indexType = IndexType.FULLTEXT, indexName = "search")
 	private String text;
 		
 	// The sentence number i.e. the sentence number within a document

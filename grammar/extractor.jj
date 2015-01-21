@@ -6,9 +6,10 @@ options {
 
 PARSER_BEGIN(QueryParser)
 
-package edu.ucsd;
+package edu.ucsd.grammar;
 
 import edu.ucsd.grammar.ForClause;
+import edu.ucsd.grammar.ForClauseType;
 
 	public class QueryParser {
 		public static void main(String[] args) 
@@ -18,13 +19,17 @@ import edu.ucsd.grammar.ForClause;
 	}
 
 
-	class VariableDeclaration implements ForClause {
+	class VariableDeclaration implements ForClauseType<VariableDeclaration> {
 		private String variableName;
 		private String variableType;
 
 		public VariableDeclaration(String variableName, String variableType) {
 			this.variableName = variableName;
 			this.variableType = variableType;
+		}
+
+		public VariableDeclaration getType() {
+			return this;
 		}
 
 		public String getVariableName() {
@@ -36,23 +41,32 @@ import edu.ucsd.grammar.ForClause;
 		}	
 	}
 
-	class VariableAssignment implements ForClause {
+	class VariableAssignment implements ForClauseType<VariableAssignment> {
 		private String variableName;
-		private String variableXpressionAssignment;
+		private String functionName;
+		private String argument;
 		
-		public VariableAssignment(String variableName, String variableXpressionAssignment) {
+		public VariableAssignment(String variableName, String functionName, String argument) {
 			this.variableName = variableName;
-			this.variableXpressionAssignment = variableXpressionAssignment;
+			this.functionName = functionName;
+			this.argument = argument;
+		}
+
+		public VariableAssignment getType() {
+			return this;
 		}
 
 		public String getVariableName() {
 			return this.variableName;
 		}
 
-		public String getVariableXpressionAssignment() {
-			return this.variableXpressionAssignment;
+		public String getFunctionName() {
+			return this.functionName;
 		}
-			
+
+		public String getArgument() {
+			return this.argument;
+		}	
 	}
 
 PARSER_END(QueryParser)
@@ -94,17 +108,20 @@ void parse() :
 	<EOF>
 }
 
-void FOR_CLAUSE() :
+ForClause FOR_CLAUSE() :
 {
+	ForClause forClause = new ForClause();
 }
 {
 	<KWFOR>
 	/* The "(" and ")" are necessary otherwise early exit */
-	(IDENTIFIER_TYPE_DECLARATION() | VARIABLE_ASSIGNMENT())
+	(IDENTIFIER_TYPE_DECLARATION(forClause) | VARIABLE_ASSIGNMENT(forClause))
 	( 
 		<CLAUSE_SEPARATOR>
-		(IDENTIFIER_TYPE_DECLARATION() | VARIABLE_ASSIGNMENT())
+		(IDENTIFIER_TYPE_DECLARATION(forClause) | VARIABLE_ASSIGNMENT(forClause))
 	)*
+
+	{ return forClause; }
 }
 
 void WHERE_CLAUSE() :
@@ -128,32 +145,41 @@ void RETURN_CLAUSE() :
 	{ System.out.println(t.image); }
 }
 
-void IDENTIFIER_TYPE_DECLARATION() :
+void IDENTIFIER_TYPE_DECLARATION(ForClause forClause) :
 {
 	Token t;
+	String variableName;
+	String variableType;
 }
 {	
 	(t = <IDENTIFIER>)
-	{ System.out.println(t.image); }
+	{ variableName = t.image; }
 	<IDENTIFIER_TYPE_SEPARATOR>
 	(t = <IDENTIFIER_TYPES>)
-	{ System.out.println(t.image); } 
+	{ 
+          variableType = t.image; 
+	  forClause.addClauseType(new VariableDeclaration(variableName, variableType)); 
+	}
 }
 
-void VARIABLE_ASSIGNMENT() :
+void VARIABLE_ASSIGNMENT(ForClause forClause) :
 {
 	Token t;
+	String variableName;
+	String functionName;
+	String argument;
 }
 {
 	(t = <IDENTIFIER>)
-	{ System.out.println(t.image); }
+	{ variableName = t.image; }
 	<VARIABLE_ASSIGNMENT>
 	(t = <FUNCTION>)
-	{ System.out.println(t.image); }
+	{ functionName = t.image; }
 	<OPEN_PAR>
 	(t = <IDENTIFIER>)
-        { System.out.println(t.image); }
+        { argument = t.image; }
 	<CLOSE_PAR>
+	{ forClause.addClauseType(new VariableAssignment(variableName, functionName, argument)); }
 }
 
 void WORD_CONSTRAINT() : 

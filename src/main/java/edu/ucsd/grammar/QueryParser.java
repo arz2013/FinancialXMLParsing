@@ -613,6 +613,7 @@ import edu.ucsd.grammar.WhereClauseType;
                         this.variableType = variableType;
                 }
 
+                @Override
                 public VariableDeclaration getType() {
                         return this;
                 }
@@ -625,15 +626,15 @@ import edu.ucsd.grammar.WhereClauseType;
                         return this.variableType;
                 }
 
-				@Override
-				public String getVariableAsString() {
-					return this.variableName;
-				}
+                @Override
+                public String getVariableAsString() {
+                        return this.variableName;
+                }
 
-				@Override
-				public String getParameterAsString() {
-					return null;
-				}
+                @Override
+                public String getParameterAsString() {
+                        return null;
+                }
         }
 
         class VariableAssignment implements ForClauseType<VariableAssignment> {
@@ -647,6 +648,7 @@ import edu.ucsd.grammar.WhereClauseType;
                         this.argument = argument;
                 }
 
+                @Override
                 public VariableAssignment getType() {
                         return this;
                 }
@@ -663,16 +665,15 @@ import edu.ucsd.grammar.WhereClauseType;
                         return this.argument;
                 }
 
-				@Override
-				public String getVariableAsString() {
-					return this.variableName;
-				}
+                @Override
+                public String getVariableAsString() {
+                        return this.variableName;
+                }
 
-				@Override
-				public String getParameterAsString() {
-					// TODO Auto-generated method stub
-					return this.argument;
-				}
+                @Override
+                public String getParameterAsString() {
+                        return this.argument;
+                }
         }
 
         class WordConstraint implements WhereClauseType<WordConstraint> {

@@ -30,6 +30,7 @@ import edu.ucsd.grammar.WhereClauseType;
 			this.variableType = variableType;
 		}
 
+		@Override
 		public VariableDeclaration getType() {
 			return this;
 		}
@@ -40,6 +41,16 @@ import edu.ucsd.grammar.WhereClauseType;
 
 		public String getVariableType() {
 			return this.variableType;
+		}
+
+		@Override
+		public String getVariableAsString() {
+			return this.variableName;
+		}
+
+		@Override
+		public String getParameterAsString() {
+			return null;
 		}	
 	}
 
@@ -54,6 +65,7 @@ import edu.ucsd.grammar.WhereClauseType;
 			this.argument = argument;
 		}
 
+		@Override
 		public VariableAssignment getType() {
 			return this;
 		}
@@ -67,6 +79,16 @@ import edu.ucsd.grammar.WhereClauseType;
 		}
 
 		public String getArgument() {
+			return this.argument;
+		}
+
+		@Override
+		public String getVariableAsString() {
+			return this.variableName;
+		}
+
+		@Override
+		public String getParameterAsString() {
 			return this.argument;
 		}	
 	}

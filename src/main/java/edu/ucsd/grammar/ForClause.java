@@ -12,4 +12,8 @@ public class ForClause<T extends ForClauseType<T>> {
 	public void addClauseType(T clauseType) {
 		clauses.add(clauseType);
 	}
+	
+	public Set<T> getClauses() {
+		return this.clauses;
+	}
 }

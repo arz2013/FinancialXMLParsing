@@ -3,6 +3,9 @@ package edu.ucsd.grammar;
 
 import edu.ucsd.grammar.ForClause;
 import edu.ucsd.grammar.ForClauseType;
+import edu.ucsd.grammar.ReturnClause;
+import edu.ucsd.grammar.WhereClause;
+import edu.ucsd.grammar.WhereClauseType;
 
         public class QueryParser implements QueryParserConstants {
                 public static void main(String[] args)
@@ -13,11 +16,15 @@ import edu.ucsd.grammar.ForClauseType;
 /* TOKEN : { < VAR_TYPE_DECLARATION : (<IDENTIFIER> ":" ("Word" | "Sentence" | "Document" > ) } */
 
 /* Parser */
-  final public void parse() throws ParseException {
-    FOR_CLAUSE();
-    WHERE_CLAUSE();
-    RETURN_CLAUSE();
-    jj_consume_token(0);
+  final public ParsedQuery parse() throws ParseException {
+        ForClause forClause;
+        WhereClause whereClause;
+        ReturnClause returnClause;
+    forClause = FOR_CLAUSE();
+    whereClause = WHERE_CLAUSE();
+    returnClause = RETURN_CLAUSE();
+          {if (true) return new ParsedQuery(forClause, whereClause, returnClause);}
+    throw new Error("Missing return statement in function");
   }
 
   final public ForClause FOR_CLAUSE() throws ParseException {
@@ -52,12 +59,13 @@ import edu.ucsd.grammar.ForClauseType;
     throw new Error("Missing return statement in function");
   }
 
-  final public void WHERE_CLAUSE() throws ParseException {
+  final public WhereClause WHERE_CLAUSE() throws ParseException {
+        WhereClause whereClause = new WhereClause();
     jj_consume_token(KWWHERE);
     if (jj_2_6(3)) {
-      WORD_CONSTRAINT();
+      WORD_CONSTRAINT(whereClause);
     } else if (jj_2_7(3)) {
-      CONTAINS_CONSTRAINT();
+      CONTAINS_CONSTRAINT(whereClause);
     } else {
       jj_consume_token(-1);
       throw new ParseException();
@@ -71,21 +79,24 @@ import edu.ucsd.grammar.ForClauseType;
       }
       jj_consume_token(WHERE_CLAUSE_CONNECTOR);
       if (jj_2_9(3)) {
-        WORD_CONSTRAINT();
+        WORD_CONSTRAINT(whereClause);
       } else if (jj_2_10(3)) {
-        CONTAINS_CONSTRAINT();
+        CONTAINS_CONSTRAINT(whereClause);
       } else {
         jj_consume_token(-1);
         throw new ParseException();
       }
     }
+          {if (true) return whereClause;}
+    throw new Error("Missing return statement in function");
   }
 
-  final public void RETURN_CLAUSE() throws ParseException {
+  final public ReturnClause RETURN_CLAUSE() throws ParseException {
         Token t;
     jj_consume_token(KWRETURN);
     t = jj_consume_token(IDENTIFIER);
-          System.out.println(t.image);
+          {if (true) return new ReturnClause(t.image);}
+    throw new Error("Missing return statement in function");
   }
 
   final public void IDENTIFIER_TYPE_DECLARATION(ForClause forClause) throws ParseException {
@@ -117,24 +128,32 @@ import edu.ucsd.grammar.ForClauseType;
           forClause.addClauseType(new VariableAssignment(variableName, functionName, argument));
   }
 
-  final public void WORD_CONSTRAINT() throws ParseException {
+  final public void WORD_CONSTRAINT(WhereClause whereClause) throws ParseException {
         Token t;
+        String variableName;
+        String variableValue;
     t = jj_consume_token(IDENTIFIER);
-         System.out.println(t.image);
+          variableName = t.image;
     jj_consume_token(VARIABLE_ASSIGNMENT);
     t = jj_consume_token(WORD);
-         System.out.println(t.image);
+                variableValue = t.image;
+                whereClause.addClauseType(new WordConstraint(variableName, variableValue));
   }
 
-  final public void CONTAINS_CONSTRAINT() throws ParseException {
+  final public void CONTAINS_CONSTRAINT(WhereClause whereClause) throws ParseException {
         Token t;
+        String identifier;
+        String function;
+        String parameter;
     t = jj_consume_token(IDENTIFIER);
-         System.out.println(t.image);
-    jj_consume_token(DOC_AND_SENTENCE_FUNCTION);
+          identifier = t.image;
+    t = jj_consume_token(DOC_AND_SENTENCE_FUNCTION);
+          function = t.image;
     jj_consume_token(OPEN_PAR);
     t = jj_consume_token(IDENTIFIER);
-         System.out.println(t.image);
+          parameter = t.image;
     jj_consume_token(CLOSE_PAR);
+          whereClause.addClauseType(new ContainsConstraint(identifier, function, parameter));
   }
 
   private boolean jj_2_1(int xla) {
@@ -207,21 +226,10 @@ import edu.ucsd.grammar.ForClauseType;
     finally { jj_save(9, xla); }
   }
 
-  private boolean jj_3_3() {
-    if (jj_scan_token(CLAUSE_SEPARATOR)) return true;
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3_4()) {
-    jj_scanpos = xsp;
-    if (jj_3_5()) return true;
-    }
-    return false;
-  }
-
-  private boolean jj_3R_4() {
+  private boolean jj_3R_5() {
     if (jj_scan_token(IDENTIFIER)) return true;
     if (jj_scan_token(VARIABLE_ASSIGNMENT)) return true;
-    if (jj_scan_token(FUNCTION)) return true;
+    if (jj_scan_token(WORD)) return true;
     return false;
   }
 
@@ -230,10 +238,15 @@ import edu.ucsd.grammar.ForClauseType;
     return false;
   }
 
-  private boolean jj_3R_5() {
+  private boolean jj_3_10() {
+    if (jj_3R_6()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_6() {
     if (jj_scan_token(IDENTIFIER)) return true;
-    if (jj_scan_token(VARIABLE_ASSIGNMENT)) return true;
-    if (jj_scan_token(WORD)) return true;
+    if (jj_scan_token(DOC_AND_SENTENCE_FUNCTION)) return true;
+    if (jj_scan_token(OPEN_PAR)) return true;
     return false;
   }
 
@@ -242,13 +255,25 @@ import edu.ucsd.grammar.ForClauseType;
     return false;
   }
 
-  private boolean jj_3_2() {
-    if (jj_3R_4()) return true;
+  private boolean jj_3_7() {
+    if (jj_3R_6()) return true;
     return false;
   }
 
   private boolean jj_3_9() {
     if (jj_3R_5()) return true;
+    return false;
+  }
+
+  private boolean jj_3_2() {
+    if (jj_3R_4()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_3() {
+    if (jj_scan_token(IDENTIFIER)) return true;
+    if (jj_scan_token(IDENTIFIER_TYPE_SEPARATOR)) return true;
+    if (jj_scan_token(IDENTIFIER_TYPES)) return true;
     return false;
   }
 
@@ -263,27 +288,15 @@ import edu.ucsd.grammar.ForClauseType;
     return false;
   }
 
-  private boolean jj_3R_6() {
-    if (jj_scan_token(IDENTIFIER)) return true;
-    if (jj_scan_token(DOC_AND_SENTENCE_FUNCTION)) return true;
-    if (jj_scan_token(OPEN_PAR)) return true;
-    return false;
-  }
-
-  private boolean jj_3_10() {
-    if (jj_3R_6()) return true;
-    return false;
-  }
-
   private boolean jj_3_6() {
     if (jj_3R_5()) return true;
     return false;
   }
 
-  private boolean jj_3R_3() {
+  private boolean jj_3R_4() {
     if (jj_scan_token(IDENTIFIER)) return true;
-    if (jj_scan_token(IDENTIFIER_TYPE_SEPARATOR)) return true;
-    if (jj_scan_token(IDENTIFIER_TYPES)) return true;
+    if (jj_scan_token(VARIABLE_ASSIGNMENT)) return true;
+    if (jj_scan_token(FUNCTION)) return true;
     return false;
   }
 
@@ -292,8 +305,14 @@ import edu.ucsd.grammar.ForClauseType;
     return false;
   }
 
-  private boolean jj_3_7() {
-    if (jj_3R_6()) return true;
+  private boolean jj_3_3() {
+    if (jj_scan_token(CLAUSE_SEPARATOR)) return true;
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3_4()) {
+    jj_scanpos = xsp;
+    if (jj_3_5()) return true;
+    }
     return false;
   }
 
@@ -585,7 +604,6 @@ import edu.ucsd.grammar.ForClauseType;
 
         }
 
-
         class VariableDeclaration implements ForClauseType<VariableDeclaration> {
                 private String variableName;
                 private String variableType;
@@ -633,5 +651,47 @@ import edu.ucsd.grammar.ForClauseType;
 
                 public String getArgument() {
                         return this.argument;
+                }
+        }
+
+        class WordConstraint implements WhereClauseType<WordConstraint> {
+                private String variableName;
+                private String variableValue;
+
+                public WordConstraint(String variableName, String variableValue) {
+                        this.variableName = variableName;
+                        this.variableValue = variableValue;;
+                }
+
+                public String getVariableName() {
+                        return this.variableName;
+                }
+
+                public String getVariableValue() {
+                        return this.variableValue;
+                }
+        }
+
+        class ContainsConstraint implements WhereClauseType<ContainsConstraint> {
+                private String variableName;
+                private String function;
+                private String functionParameter;
+
+                public ContainsConstraint(String variableName, String function, String functionParameter) {
+                        this.variableName = variableName;
+                        this.function = function;
+                        this.functionParameter = functionParameter;
+}
+
+                public String getVariableName() {
+                        return this.variableName;
+                }
+
+                public String getFunction() {
+                        return this.function;
+                }
+
+                public String getFunctionParameter() {
+                        return this.functionParameter;
                 }
         }

@@ -2,6 +2,9 @@
 package edu.ucsd.grammar;
 import edu.ucsd.grammar.ForClause;
 import edu.ucsd.grammar.ForClauseType;
+import edu.ucsd.grammar.ReturnClause;
+import edu.ucsd.grammar.WhereClause;
+import edu.ucsd.grammar.WhereClauseType;
 
 /** Token Manager. */
 public class QueryParserTokenManager implements QueryParserConstants

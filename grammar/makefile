@@ -10,7 +10,15 @@ compile:
 	$(JC) $(JFLAGS) classes *.java
 
 copy-interfaces:
-	cp ../FinalProjectInterfaces/*.java . 
+	cp ../FinancialXMLParser/src/main/java/edu/ucsd/grammar/ForClause.java .
+	cp ../FinancialXMLParser/src/main/java/edu/ucsd/grammar/ForClauseType.java .
+	cp ../FinancialXMLParser/src/main/java/edu/ucsd/grammar/ParsedQuery.java . 
+	cp ../FinancialXMLParser/src/main/java/edu/ucsd/grammar/WhereClause.java .
+	cp ../FinancialXMLParser/src/main/java/edu/ucsd/grammar/WhereClauseType.java .
+	cp ../FinancialXMLParser/src/main/java/edu/ucsd/grammar/ReturnClause.java .
+
+copy-java-files:
+	cp *.java ../FinancialXMLParser/src/main/java/edu/ucsd/grammar/
 
 default: compile
 

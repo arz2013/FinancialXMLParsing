@@ -10,15 +10,17 @@ package edu.ucsd.grammar;
 
 import edu.ucsd.grammar.ForClause;
 import edu.ucsd.grammar.ForClauseType;
+import edu.ucsd.grammar.ReturnClause;
+import edu.ucsd.grammar.WhereClause;
+import edu.ucsd.grammar.WhereClauseType;
 
 	public class QueryParser {
 		public static void main(String[] args) 
 		throws ParseException, TokenMgrError {
 			QueryParser queryParser = new QueryParser( System.in );
-			queryParser.parse(); }
+			queryParser.parse(); } 
 	}
-
-
+	
 	class VariableDeclaration implements ForClauseType<VariableDeclaration> {
 		private String variableName;
 		private String variableType;
@@ -69,6 +71,48 @@ import edu.ucsd.grammar.ForClauseType;
 		}	
 	}
 
+	class WordConstraint implements WhereClauseType<WordConstraint> {
+		private String variableName;
+		private String variableValue;
+
+		public WordConstraint(String variableName, String variableValue) {
+			this.variableName = variableName;
+			this.variableValue = variableValue;;
+		}
+
+		public String getVariableName() {
+			return this.variableName;
+		}
+
+		public String getVariableValue() {
+			return this.variableValue;
+		}
+	}
+
+	class ContainsConstraint implements WhereClauseType<ContainsConstraint> {
+		private String variableName;
+		private String function;
+		private String functionParameter;
+
+		public ContainsConstraint(String variableName, String function, String functionParameter) {
+			this.variableName = variableName;
+			this.function = function;
+			this.functionParameter = functionParameter;
+}
+		
+		public String getVariableName() {
+			return this.variableName;
+		}
+
+		public String getFunction() {
+			return this.function;
+		}
+
+		public String getFunctionParameter() {
+			return this.functionParameter;
+		}
+	}
+
 PARSER_END(QueryParser)
 
 /* Lexical Analyzer */
@@ -98,14 +142,18 @@ TOKEN : { < CLAUSE_SEPARATOR : "," > }
 /* TOKEN : { < VAR_TYPE_DECLARATION : (<IDENTIFIER> ":" ("Word" | "Sentence" | "Document" > ) } */
 
 /* Parser */
-void parse() :
+ParsedQuery parse() :
 {
+	ForClause forClause;
+	WhereClause whereClause;
+	ReturnClause returnClause;	
 }
 {
-	FOR_CLAUSE()
-	WHERE_CLAUSE()
-	RETURN_CLAUSE()
-	<EOF>
+	forClause = FOR_CLAUSE()
+	whereClause = WHERE_CLAUSE()
+	returnClause = RETURN_CLAUSE()
+
+	{ return new ParsedQuery(forClause, whereClause, returnClause); } 
 }
 
 ForClause FOR_CLAUSE() :
@@ -124,25 +172,28 @@ ForClause FOR_CLAUSE() :
 	{ return forClause; }
 }
 
-void WHERE_CLAUSE() :
+WhereClause WHERE_CLAUSE() :
 {
+	WhereClause whereClause = new WhereClause();
 }
 {
 	<KWWHERE>
-	(WORD_CONSTRAINT() | CONTAINS_CONSTRAINT())
+	(WORD_CONSTRAINT(whereClause) | CONTAINS_CONSTRAINT(whereClause))
 	(<WHERE_CLAUSE_CONNECTOR>
-	 (WORD_CONSTRAINT() | CONTAINS_CONSTRAINT())
+	 (WORD_CONSTRAINT(whereClause) | CONTAINS_CONSTRAINT(whereClause))
 	)*
+
+	{ return whereClause; }
 }
 
-void RETURN_CLAUSE() :
+ReturnClause RETURN_CLAUSE() :
 {
 	Token t;
 }
 {
 	<KWRETURN>
 	(t = <IDENTIFIER>)
-	{ System.out.println(t.image); }
+	{ return new ReturnClause(t.image); }
 }
 
 void IDENTIFIER_TYPE_DECLARATION(ForClause forClause) :
@@ -182,29 +233,39 @@ void VARIABLE_ASSIGNMENT(ForClause forClause) :
 	{ forClause.addClauseType(new VariableAssignment(variableName, functionName, argument)); }
 }
 
-void WORD_CONSTRAINT() : 
+void WORD_CONSTRAINT(WhereClause whereClause) : 
 {
 	Token t;
+	String variableName;
+	String variableValue;
 }
 {
 	(t = <IDENTIFIER>)
-	{System.out.println(t.image);}
+	{ variableName = t.image; }
 	<VARIABLE_ASSIGNMENT>
 	(t = <WORD>)
-	{System.out.println(t.image);} 
+	{ 
+		variableValue = t.image;
+		whereClause.addClauseType(new WordConstraint(variableName, variableValue));
+	} 
 }
 
-void CONTAINS_CONSTRAINT() :
+void CONTAINS_CONSTRAINT(WhereClause whereClause) :
 {
 	Token t;
+	String identifier;
+	String function;
+	String parameter;
 }
 {
 	(t = <IDENTIFIER>)
-	{System.out.println(t.image);}
-	<DOC_AND_SENTENCE_FUNCTION>
+	{ identifier = t.image; }
+	(t = <DOC_AND_SENTENCE_FUNCTION>)
+	{ function = t.image; }
 	<OPEN_PAR>
 	(t = <IDENTIFIER>)
-	{System.out.println(t.image);}
+	{ parameter = t.image; }
 	<CLOSE_PAR>
+	{ whereClause.addClauseType(new ContainsConstraint(identifier, function, parameter)); }
 }
 

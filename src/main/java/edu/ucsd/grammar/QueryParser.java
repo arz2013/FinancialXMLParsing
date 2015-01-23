@@ -226,6 +226,30 @@ import edu.ucsd.grammar.WhereClauseType;
     finally { jj_save(9, xla); }
   }
 
+  private boolean jj_3R_5() {
+    if (jj_scan_token(IDENTIFIER)) return true;
+    if (jj_scan_token(VARIABLE_ASSIGNMENT)) return true;
+    if (jj_scan_token(WORD)) return true;
+    return false;
+  }
+
+  private boolean jj_3_5() {
+    if (jj_3R_4()) return true;
+    return false;
+  }
+
+  private boolean jj_3_10() {
+    if (jj_3R_6()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_6() {
+    if (jj_scan_token(IDENTIFIER)) return true;
+    if (jj_scan_token(DOC_AND_SENTENCE_FUNCTION)) return true;
+    if (jj_scan_token(OPEN_PAR)) return true;
+    return false;
+  }
+
   private boolean jj_3_1() {
     if (jj_3R_3()) return true;
     return false;
@@ -289,30 +313,6 @@ import edu.ucsd.grammar.WhereClauseType;
     jj_scanpos = xsp;
     if (jj_3_5()) return true;
     }
-    return false;
-  }
-
-  private boolean jj_3R_5() {
-    if (jj_scan_token(IDENTIFIER)) return true;
-    if (jj_scan_token(VARIABLE_ASSIGNMENT)) return true;
-    if (jj_scan_token(WORD)) return true;
-    return false;
-  }
-
-  private boolean jj_3_5() {
-    if (jj_3R_4()) return true;
-    return false;
-  }
-
-  private boolean jj_3_10() {
-    if (jj_3R_6()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_6() {
-    if (jj_scan_token(IDENTIFIER)) return true;
-    if (jj_scan_token(DOC_AND_SENTENCE_FUNCTION)) return true;
-    if (jj_scan_token(OPEN_PAR)) return true;
     return false;
   }
 
@@ -627,6 +627,11 @@ import edu.ucsd.grammar.WhereClauseType;
                 }
 
                 @Override
+                public String getFunctionName() {
+                        return null;
+                }
+
+                @Override
                 public String getVariableAsString() {
                         return this.variableName;
                 }
@@ -657,6 +662,7 @@ import edu.ucsd.grammar.WhereClauseType;
                         return this.variableName;
                 }
 
+                @Override
                 public String getFunctionName() {
                         return this.functionName;
                 }
@@ -698,6 +704,11 @@ import edu.ucsd.grammar.WhereClauseType;
                 public String getVariableValue() {
                         return this.variableValue;
                 }
+
+                @Override
+                public boolean usesVariableName(String variableName) {
+                        return variableName.equals(this.variableName);
+                }
         }
 
         class ContainsConstraint implements WhereClauseType<ContainsConstraint> {
@@ -723,5 +734,10 @@ import edu.ucsd.grammar.WhereClauseType;
                 @Override
                 public String getFunctionParameter() {
                         return this.functionParameter;
+                }
+
+                @Override
+                public boolean usesVariableName(String variableName) {
+                        return variableName.equals(this.variableName) || variableName.equals(getFunctionParameter());
                 }
         }

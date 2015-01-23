@@ -42,6 +42,11 @@ import edu.ucsd.grammar.WhereClauseType;
 		public String getVariableType() {
 			return this.variableType;
 		}
+		
+		@Override
+		public String getFunctionName() {
+			return null;
+		}
 
 		@Override
 		public String getVariableAsString() {
@@ -74,6 +79,7 @@ import edu.ucsd.grammar.WhereClauseType;
 			return this.variableName;
 		}
 
+		@Override
 		public String getFunctionName() {
 			return this.functionName;
 		}
@@ -115,6 +121,11 @@ import edu.ucsd.grammar.WhereClauseType;
 		public String getVariableValue() {
 			return this.variableValue;
 		}
+		
+		@Override
+		public boolean usesVariableName(String variableName) {
+			return variableName.equals(this.variableName);
+		}
 	}
 
 	class ContainsConstraint implements WhereClauseType<ContainsConstraint> {
@@ -140,6 +151,11 @@ import edu.ucsd.grammar.WhereClauseType;
 		@Override
 		public String getFunctionParameter() {
 			return this.functionParameter;
+		}
+		
+		@Override
+		public boolean usesVariableName(String variableName) {
+			return variableName.equals(this.variableName) || variableName.equals(getFunctionParameter());
 		}
 	}
 

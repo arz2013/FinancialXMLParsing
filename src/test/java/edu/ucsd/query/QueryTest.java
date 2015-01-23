@@ -25,6 +25,12 @@ public class QueryTest {
 	
 	@Rule
 	public ExpectedException undeclaredVariableUsedAsParameterInWhereClause = ExpectedException.none();
+	
+	@Rule
+	public ExpectedException unusedParameterInWhereClause = ExpectedException.none();
+	
+	@Rule
+	public ExpectedException undeclaredVariableInReturnClause = ExpectedException.none();
 
 	@Test
 	public void testValidQuery() throws ParseException {
@@ -68,7 +74,28 @@ public class QueryTest {
 	}
 	
 	@Test(expected=TokenMgrError.class)
-	public void testParameterValueMustBeSingleString() throws ParseException {
+	public void testParameterValueMustBeSingleStringInWhereClause() throws ParseException {
 		Query.createQuery("for w:Word , p = shortest_term_starting_with(w), s:Sentence where w = 'Walt Disney' and s.contains(w) return s");		
+	}
+	
+	@Test
+	public void testUnusedParameterInWhereClause1() throws ParseException {
+		unusedParameterInWhereClause.expect(ValidationException.class);
+		unusedParameterInWhereClause.expectMessage("Parameter is declared and set but does not contribute to the return statement.");
+		Query.createQuery("for w:Word , w1:Word, p = shortest_term_starting_with(w), s:Sentence where w = 'Walt' and w1 = 'Disney' and s.contains(w) return s");			
+	}
+	
+	@Test
+	public void testUnusedParameterInWhereClause2() throws ParseException {
+		unusedParameterInWhereClause.expect(ValidationException.class);
+		unusedParameterInWhereClause.expectMessage("Parameter is declared but does not contribute to the where and return statements.");
+		Query.createQuery("for w:Word , w1:Word, p = shortest_term_starting_with(w), s:Sentence where w = 'Walt' and s.contains(w) return w");			
+	}
+	
+	@Test
+	public void testUndeclaredVariableInReturnClause() throws ParseException {
+		this.undeclaredVariableInReturnClause.expect(ValidationException.class);
+		this.undeclaredVariableInReturnClause.expectMessage("Undeclared variable in return clause.");
+		Query.createQuery("for w:Word , p = shortest_term_starting_with(w), s:Sentence where w = 'Walt' and s.contains(w) return s1");
 	}
 }

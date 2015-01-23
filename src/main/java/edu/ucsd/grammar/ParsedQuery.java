@@ -1,5 +1,6 @@
 package edu.ucsd.grammar;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -91,7 +92,21 @@ public class ParsedQuery<F extends ForClauseType<F>, W extends WhereClauseType<W
 		}
 		
 		// Check assignments are valid
+		Map<String, VariableTypes> varNameToTypes = new HashMap<String, VariableTypes>();
+		for(ForClauseType forClauseType : this.forClause.getClauses()) {
+			if(forClauseType.getFunctionName() == null) {
+				varNameToTypes.put(forClauseType.getVariableAsString(), forClauseType.getVariableTypes(forClauseType.getVariableAsString()));
+			}
+		}
 		
+		variableAssignments = clauses.stream().filter(w -> w.getFunctionParameter() == null).map(w-> w.getVariableName()).collect(Collectors.toCollection(HashSet::new));
+		
+		for(String whereVariableAssignment : variableAssignments) {
+			VariableTypes vt = varNameToTypes.get(whereVariableAssignment);
+			if(!vt.isAcceptAssignment()) {
+				throw new ValidationException("Invalid assignment in where clause.");
+			}
+		}
 	}
 
 

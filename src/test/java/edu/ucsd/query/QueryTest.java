@@ -100,6 +100,7 @@ public class QueryTest {
 	@Test
 	public void testInvalidAssigmentInWhereClause() throws ParseException {
 		invalidAssignment.expect(ValidationException.class);
+		invalidAssignment.expectMessage("Invalid assignment in where clause.");
 		Query.createQuery("for s:Sentence where s = 'Walt' return s");
 	}
 	

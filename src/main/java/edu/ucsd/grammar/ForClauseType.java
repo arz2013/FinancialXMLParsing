@@ -5,4 +5,5 @@ public interface ForClauseType<T extends ForClauseType<T>> {
 	String getVariableAsString();
 	String getFunctionName();
 	String getParameterAsString();
+	VariableTypes getVariableTypes(String variableName);
 }

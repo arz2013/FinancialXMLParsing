@@ -12,4 +12,8 @@ public class WhereClause<T extends WhereClauseType<T>> {
 	public void addClauseType(T clauseType) {
 		clauseTypes.add(clauseType);
 	}
+	
+	public Set<T> getClauses() {
+		return this.clauseTypes;
+	}
 }

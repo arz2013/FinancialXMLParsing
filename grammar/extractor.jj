@@ -102,8 +102,14 @@ import edu.ucsd.grammar.WhereClauseType;
 			this.variableValue = variableValue;;
 		}
 
+		@Override
 		public String getVariableName() {
 			return this.variableName;
+		}
+		
+		@Override
+		public String getFunctionParameter() {
+			return null;
 		}
 
 		public String getVariableValue() {
@@ -120,8 +126,9 @@ import edu.ucsd.grammar.WhereClauseType;
 			this.variableName = variableName;
 			this.function = function;
 			this.functionParameter = functionParameter;
-}
+		}
 		
+		@Override
 		public String getVariableName() {
 			return this.variableName;
 		}
@@ -130,6 +137,7 @@ import edu.ucsd.grammar.WhereClauseType;
 			return this.function;
 		}
 
+		@Override
 		public String getFunctionParameter() {
 			return this.functionParameter;
 		}

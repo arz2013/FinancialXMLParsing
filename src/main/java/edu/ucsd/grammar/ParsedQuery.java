@@ -89,6 +89,9 @@ public class ParsedQuery<F extends ForClauseType<F>, W extends WhereClauseType<W
 		if(functionWhereClauses.size() > 0 || variableAssignments.size() > 0) {
 			throw new ValidationException("Parameter is declared and set but does not contribute to the return statement.");
 		}
+		
+		// Check assignments are valid
+		
 	}
 
 

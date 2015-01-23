@@ -31,11 +31,16 @@ public class QueryTest {
 	
 	@Rule
 	public ExpectedException undeclaredVariableInReturnClause = ExpectedException.none();
+	
+	@Rule
+	public ExpectedException invalidAssignment = ExpectedException.none();
 
 	@Test
 	public void testValidQuery() throws ParseException {
 		Query query = Query.createQuery("for w:Word , p = shortest_term_starting_with(w), s:Sentence where w = 'Walt' and s.contains(w) return s");
 		assertTrue("Query is not null indicating successful parse.", query != null);
+		Query.createQuery("for w:Word where w = 'Walt' return w");
+		
 	}
 	
 	@Test
@@ -91,6 +96,23 @@ public class QueryTest {
 		unusedParameterInWhereClause.expectMessage("Parameter is declared but does not contribute to the where and return statements.");
 		Query.createQuery("for w:Word , w1:Word, p = shortest_term_starting_with(w), s:Sentence where w = 'Walt' and s.contains(w) return w");			
 	}
+	
+	@Test
+	public void testInvalidAssigmentInWhereClause() throws ParseException {
+		invalidAssignment.expect(ValidationException.class);
+		Query.createQuery("for s:Sentence where s = 'Walt' return s");
+	}
+	
+	@Test
+	public void testInvalidFunctionCallInWhereClause() throws ParseException {
+		// Calling the contains function on a w 
+	}
+	
+	@Test
+	public void testInvalidContainsInWhereClause() throws ParseException {
+		// Document can contain Sentence, Phrase and Word, but not the other way around
+	}
+	
 	
 	@Test
 	public void testUndeclaredVariableInReturnClause() throws ParseException {

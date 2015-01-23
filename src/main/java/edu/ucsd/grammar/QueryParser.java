@@ -226,50 +226,6 @@ import edu.ucsd.grammar.WhereClauseType;
     finally { jj_save(9, xla); }
   }
 
-  private boolean jj_3R_5() {
-    if (jj_scan_token(IDENTIFIER)) return true;
-    if (jj_scan_token(VARIABLE_ASSIGNMENT)) return true;
-    if (jj_scan_token(WORD)) return true;
-    return false;
-  }
-
-  private boolean jj_3_5() {
-    if (jj_3R_4()) return true;
-    return false;
-  }
-
-  private boolean jj_3_10() {
-    if (jj_3R_6()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_6() {
-    if (jj_scan_token(IDENTIFIER)) return true;
-    if (jj_scan_token(DOC_AND_SENTENCE_FUNCTION)) return true;
-    if (jj_scan_token(OPEN_PAR)) return true;
-    return false;
-  }
-
-  private boolean jj_3_1() {
-    if (jj_3R_3()) return true;
-    return false;
-  }
-
-  private boolean jj_3_7() {
-    if (jj_3R_6()) return true;
-    return false;
-  }
-
-  private boolean jj_3_9() {
-    if (jj_3R_5()) return true;
-    return false;
-  }
-
-  private boolean jj_3_2() {
-    if (jj_3R_4()) return true;
-    return false;
-  }
-
   private boolean jj_3R_3() {
     if (jj_scan_token(IDENTIFIER)) return true;
     if (jj_scan_token(IDENTIFIER_TYPE_SEPARATOR)) return true;
@@ -313,6 +269,50 @@ import edu.ucsd.grammar.WhereClauseType;
     jj_scanpos = xsp;
     if (jj_3_5()) return true;
     }
+    return false;
+  }
+
+  private boolean jj_3R_5() {
+    if (jj_scan_token(IDENTIFIER)) return true;
+    if (jj_scan_token(VARIABLE_ASSIGNMENT)) return true;
+    if (jj_scan_token(WORD)) return true;
+    return false;
+  }
+
+  private boolean jj_3_5() {
+    if (jj_3R_4()) return true;
+    return false;
+  }
+
+  private boolean jj_3_10() {
+    if (jj_3R_6()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_6() {
+    if (jj_scan_token(IDENTIFIER)) return true;
+    if (jj_scan_token(DOC_AND_SENTENCE_FUNCTION)) return true;
+    if (jj_scan_token(OPEN_PAR)) return true;
+    return false;
+  }
+
+  private boolean jj_3_1() {
+    if (jj_3R_3()) return true;
+    return false;
+  }
+
+  private boolean jj_3_7() {
+    if (jj_3R_6()) return true;
+    return false;
+  }
+
+  private boolean jj_3_9() {
+    if (jj_3R_5()) return true;
+    return false;
+  }
+
+  private boolean jj_3_2() {
+    if (jj_3R_4()) return true;
     return false;
   }
 

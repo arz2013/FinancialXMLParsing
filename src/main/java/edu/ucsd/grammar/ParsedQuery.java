@@ -62,12 +62,12 @@ public class ParsedQuery<F extends ForClauseType<F>, W extends WhereClauseType<W
 		
 		// Validate if there are unused variables that don't contribute to the return statement
 		Map<String, W> functionWhereClauses = clauses.stream().filter(w->w.getFunctionParameter() != null).collect(Collectors.toMap(w -> w.getVariableName(), w -> w));
-		Set<String> variableAssignments = clauses.stream().filter(w -> w.getFunctionParameter() == null).map(w-> w.getVariableName()).collect(Collectors.toCollection(HashSet::new));
+		Set<String> filterCriteriaAssignments = clauses.stream().filter(w -> w.getFunctionParameter() == null).map(w-> w.getVariableName()).collect(Collectors.toCollection(HashSet::new));
 		Set<String> forVarNoFunctions = this.forClause.getClauses().stream().filter(f -> f.getFunctionName() == null).map(f -> f.getVariableAsString()).collect(Collectors.toCollection(HashSet::new));
 		boolean notUsed = true;
 		for(String variable : forVarNoFunctions) {
 			// Check Variable Assignments
-			notUsed = notUsed && !variableAssignments.contains(variable);
+			notUsed = notUsed && !filterCriteriaAssignments.contains(variable);
 			// Check Function calls
 			for(W function : functionWhereClauses.values()) {
 				notUsed = notUsed && !function.usesVariableName(variable);
@@ -81,22 +81,29 @@ public class ParsedQuery<F extends ForClauseType<F>, W extends WhereClauseType<W
 		}
 		
 		W whereClause = functionWhereClauses.remove(returnVariableName);
-		if(whereClause != null) {
-			variableAssignments.remove(whereClause.getFunctionParameter());
-		} else {
-			variableAssignments.remove(returnVariableName);
+		if(whereClause != null) { // return variable is specified as part of the where clause
+			filterCriteriaAssignments.remove(whereClause.getFunctionParameter());
+			if(functionWhereClauses.size() > 0 || filterCriteriaAssignments.size() > 0) {
+				throw new ValidationException("Parameter is declared and set but does not contribute to the return statement.");
+			}
+		} else { // return variable is specified as part of the for clause
+			Map<String, F> forClauseAssignments = this.forClause.getClauses().stream().filter(f -> f.getFunctionName() != null).collect(Collectors.toMap(f -> f.getVariableAsString(), f -> f));
+			F assignment = forClauseAssignments.remove(returnVariableName);	
+			if(assignment != null) {
+				filterCriteriaAssignments.remove(assignment.getParameterAsString());
+				if(forClauseAssignments.size() > 0 || filterCriteriaAssignments.size() > 0) {
+					throw new ValidationException("Parameter is declared and set but does not contribute to the return statement.");
+				}
+			}
 		}
-		
-		if(functionWhereClauses.size() > 0 || variableAssignments.size() > 0) {
-			throw new ValidationException("Parameter is declared and set but does not contribute to the return statement.");
-		}
+
 		
 		// Check assignments are valid
 		Map<String, VariableTypes> varNameToTypes = this.getForClauseVariableDeclarations();
 		
-		variableAssignments = clauses.stream().filter(w -> w.getFunctionParameter() == null).map(w-> w.getVariableName()).collect(Collectors.toCollection(HashSet::new));
+		filterCriteriaAssignments = clauses.stream().filter(w -> w.getFunctionParameter() == null).map(w-> w.getVariableName()).collect(Collectors.toCollection(HashSet::new));
 		
-		for(String whereVariableAssignment : variableAssignments) {
+		for(String whereVariableAssignment : filterCriteriaAssignments) {
 			VariableTypes vt = varNameToTypes.get(whereVariableAssignment);
 			if(!vt.isAcceptAssignment()) {
 				throw new ValidationException("Invalid assignment in where clause.");

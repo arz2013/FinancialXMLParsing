@@ -53,7 +53,7 @@ public class QueryTest {
 		Query query = Query.createQuery("for w:Word , p = shortest_term_starting_with(w), s:Sentence where w = 'Walt' and s.contains(w) return s");
 		assertTrue("Query is not null indicating successful parse.", query != null);
 		Query.createQuery("for w:Word where w = 'Walt' return w");
-		
+		Query.createQuery("for w:Word, p = shortest_term_starting_with(w) where w = 'Walt' return p");
 	}
 	
 	@Test

@@ -102,8 +102,21 @@ public class ParsedQuery<F extends ForClauseType<F>, W extends WhereClauseType<W
 				throw new ValidationException("Invalid assignment in where clause.");
 			}
 		}
+		
+		validateTypeFunctions();
 	}
 
+
+	private void validateTypeFunctions() {
+		Map<String, VariableTypes> varNameAndType = this.getForClauseVariableAndTypes();
+		Set<W> functionApplications = this.whereClause.getClauses().stream().filter(w->w.getFunctionParameter() != null).collect(Collectors.toSet());
+		for(W function : functionApplications) {
+			TypeFunction typeFunction = TypeFunctions.fromString(function.getFunctionName()).getTypeFunction();
+			if(!typeFunction.isValid(varNameAndType.get(function.getVariableName()), varNameAndType.get(function.getFunctionParameter()))) {
+				throw new ValidationException("Incorrect Type Function application.");
+			}
+		}
+	}
 
 	private Set<String> validateForClause() {
 		// Validate For Clause
@@ -140,6 +153,20 @@ public class ParsedQuery<F extends ForClauseType<F>, W extends WhereClauseType<W
 		for(ForClauseType forClauseType : this.forClause.getClauses()) {
 			if(forClauseType.getFunctionName() == null) {
 				varNameToTypes.put(forClauseType.getVariableAsString(), forClauseType.getVariableTypes(forClauseType.getVariableAsString()));
+			}
+		}
+		
+		return varNameToTypes;
+	}
+	
+	private Map<String, VariableTypes> getForClauseVariableAndTypes() {
+		Map<String, VariableTypes> varNameToTypes = new HashMap<String, VariableTypes>();
+		for(ForClauseType<F> forClauseType : this.forClause.getClauses()) {
+			if(forClauseType.getFunctionName() == null) {
+				varNameToTypes.put(forClauseType.getVariableAsString(), forClauseType.getVariableTypes(forClauseType.getVariableAsString()));
+			} else {
+				VariableAssignment va = (VariableAssignment) forClauseType;
+				varNameToTypes.put(forClauseType.getVariableAsString(), va.getInferredType());
 			}
 		}
 		

@@ -2,6 +2,7 @@ package edu.ucsd.query;
 
 import static org.junit.Assert.*;
 
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -37,7 +38,16 @@ public class QueryTest {
 	
 	@Rule
 	public ExpectedException invalidAssignment = ExpectedException.none();
-
+	
+	@Rule
+	public ExpectedException incorrectTypeApplication1 = ExpectedException.none();
+	
+	@Rule
+	public ExpectedException incorrectTypeApplication2 = ExpectedException.none();
+	
+	@Rule
+	public ExpectedException incorrectTypeApplication3 = ExpectedException.none();
+	
 	@Test
 	public void testValidQuery() throws ParseException {
 		Query query = Query.createQuery("for w:Word , p = shortest_term_starting_with(w), s:Sentence where w = 'Walt' and s.contains(w) return s");
@@ -114,14 +124,35 @@ public class QueryTest {
 		Query.createQuery("for s:Sentence where s = 'Walt' return s");
 	}
 	
+	@Ignore
 	@Test
 	public void testInvalidFunctionCallInWhereClause() throws ParseException {
 		// Calling the contains function on a w 
+		// Query query = Query.createQuery("for w:Word , p = shortest_term_starting_with(w), s:Sentence where w = 'Walt' and w.contains(s) return s");
 	}
 	
 	@Test
-	public void testInvalidContainsInWhereClause() throws ParseException {
+	public void testInvalidContainsInWhereClause1() throws ParseException {
 		// Document can contain Sentence, Phrase and Word, but not the other way around
+		incorrectTypeApplication1.expect(ValidationException.class);
+		incorrectTypeApplication1.expectMessage("Incorrect Type Function application.");
+		Query.createQuery("for s:Sentence where s.contains(s) return s");
+	}
+	
+	@Test
+	public void testInvalidContainsInWhereClause2() throws ParseException {
+		// Document can contain Sentence, Phrase and Word, but not the other way around
+		incorrectTypeApplication2.expect(ValidationException.class);
+		incorrectTypeApplication2.expectMessage("Incorrect Type Function application.");
+		Query.createQuery("for w:Word where w.contains(w) return w");
+	}
+	
+	@Test
+	public void testInvalidContainsInWhereClause3() throws ParseException {
+		// Document can contain Sentence, Phrase and Word, but not the other way around
+		incorrectTypeApplication3.expect(ValidationException.class);
+		incorrectTypeApplication3.expectMessage("Incorrect Type Function application.");
+		Query.createQuery("for s:Sentence, w:Word where w.contains(s) return w");
 	}
 	
 	

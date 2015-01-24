@@ -640,7 +640,7 @@ import edu.ucsd.grammar.WhereClauseType;
 
                 public ContainsConstraint(String variableName, String function, String functionParameter) {
                         this.variableName = variableName;
-                        this.function = function;
+                        this.function = function.substring(1);
                         this.functionParameter = functionParameter;
                 }
 
@@ -649,7 +649,8 @@ import edu.ucsd.grammar.WhereClauseType;
                         return this.variableName;
                 }
 
-                public String getFunction() {
+                @Override
+                public String getFunctionName() {
                         return this.function;
                 }
 

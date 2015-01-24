@@ -135,15 +135,17 @@ public class QueryTest {
 	public void testInvalidContainsInWhereClause1() throws ParseException {
 		// Document can contain Sentence, Phrase and Word, but not the other way around
 		incorrectTypeApplication1.expect(ValidationException.class);
-		incorrectTypeApplication1.expectMessage("Incorrect Type Function application.");
-		Query.createQuery("for s:Sentence where s.contains(s) return s");
+		incorrectTypeApplication1.expectMessage("Parameter is declared and set but does not contribute to the return statement.");
+		Query.createQuery("for w:Word, s:Sentence where w = 'Walt' and s.contains(s) return s");
 	}
 	
-	@Test
+	@Test(expected=ParseException.class)
 	public void testInvalidContainsInWhereClause2() throws ParseException {
 		// Document can contain Sentence, Phrase and Word, but not the other way around
+		/*
 		incorrectTypeApplication2.expect(ValidationException.class);
 		incorrectTypeApplication2.expectMessage("Incorrect Type Function application.");
+		*/
 		Query.createQuery("for w:Word where w.contains(w) return w");
 	}
 	
@@ -151,8 +153,8 @@ public class QueryTest {
 	public void testInvalidContainsInWhereClause3() throws ParseException {
 		// Document can contain Sentence, Phrase and Word, but not the other way around
 		incorrectTypeApplication3.expect(ValidationException.class);
-		incorrectTypeApplication3.expectMessage("Incorrect Type Function application.");
-		Query.createQuery("for s:Sentence, w:Word where w.contains(s) return w");
+		incorrectTypeApplication3.expectMessage("Duplicate Parameters in where clause.");
+		Query.createQuery("for s:Sentence, w:Word where w = 'Walt' and w.contains(s) return w");
 	}
 	
 	

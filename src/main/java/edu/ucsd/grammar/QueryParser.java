@@ -62,25 +62,18 @@ import edu.ucsd.grammar.WhereClauseType;
   final public WhereClause WHERE_CLAUSE() throws ParseException {
         WhereClause whereClause = new WhereClause();
     jj_consume_token(KWWHERE);
-    if (jj_2_6(3)) {
-      WORD_CONSTRAINT(whereClause);
-    } else if (jj_2_7(3)) {
-      CONTAINS_CONSTRAINT(whereClause);
-    } else {
-      jj_consume_token(-1);
-      throw new ParseException();
-    }
+    WORD_CONSTRAINT(whereClause);
     label_2:
     while (true) {
-      if (jj_2_8(3)) {
+      if (jj_2_6(3)) {
         ;
       } else {
         break label_2;
       }
       jj_consume_token(WHERE_CLAUSE_CONNECTOR);
-      if (jj_2_9(3)) {
+      if (jj_2_7(3)) {
         WORD_CONSTRAINT(whereClause);
-      } else if (jj_2_10(3)) {
+      } else if (jj_2_8(3)) {
         CONTAINS_CONSTRAINT(whereClause);
       } else {
         jj_consume_token(-1);
@@ -212,43 +205,6 @@ import edu.ucsd.grammar.WhereClauseType;
     finally { jj_save(7, xla); }
   }
 
-  private boolean jj_2_9(int xla) {
-    jj_la = xla; jj_lastpos = jj_scanpos = token;
-    try { return !jj_3_9(); }
-    catch(LookaheadSuccess ls) { return true; }
-    finally { jj_save(8, xla); }
-  }
-
-  private boolean jj_2_10(int xla) {
-    jj_la = xla; jj_lastpos = jj_scanpos = token;
-    try { return !jj_3_10(); }
-    catch(LookaheadSuccess ls) { return true; }
-    finally { jj_save(9, xla); }
-  }
-
-  private boolean jj_3R_3() {
-    if (jj_scan_token(IDENTIFIER)) return true;
-    if (jj_scan_token(IDENTIFIER_TYPE_SEPARATOR)) return true;
-    if (jj_scan_token(IDENTIFIER_TYPES)) return true;
-    return false;
-  }
-
-  private boolean jj_3_8() {
-    if (jj_scan_token(WHERE_CLAUSE_CONNECTOR)) return true;
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3_9()) {
-    jj_scanpos = xsp;
-    if (jj_3_10()) return true;
-    }
-    return false;
-  }
-
-  private boolean jj_3_6() {
-    if (jj_3R_5()) return true;
-    return false;
-  }
-
   private boolean jj_3R_4() {
     if (jj_scan_token(IDENTIFIER)) return true;
     if (jj_scan_token(VARIABLE_ASSIGNMENT)) return true;
@@ -284,7 +240,7 @@ import edu.ucsd.grammar.WhereClauseType;
     return false;
   }
 
-  private boolean jj_3_10() {
+  private boolean jj_3_8() {
     if (jj_3R_6()) return true;
     return false;
   }
@@ -302,17 +258,30 @@ import edu.ucsd.grammar.WhereClauseType;
   }
 
   private boolean jj_3_7() {
-    if (jj_3R_6()) return true;
-    return false;
-  }
-
-  private boolean jj_3_9() {
     if (jj_3R_5()) return true;
     return false;
   }
 
   private boolean jj_3_2() {
     if (jj_3R_4()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_3() {
+    if (jj_scan_token(IDENTIFIER)) return true;
+    if (jj_scan_token(IDENTIFIER_TYPE_SEPARATOR)) return true;
+    if (jj_scan_token(IDENTIFIER_TYPES)) return true;
+    return false;
+  }
+
+  private boolean jj_3_6() {
+    if (jj_scan_token(WHERE_CLAUSE_CONNECTOR)) return true;
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3_7()) {
+    jj_scanpos = xsp;
+    if (jj_3_8()) return true;
+    }
     return false;
   }
 
@@ -335,7 +304,7 @@ import edu.ucsd.grammar.WhereClauseType;
    private static void jj_la1_init_0() {
       jj_la1_0 = new int[] {};
    }
-  final private JJCalls[] jj_2_rtns = new JJCalls[10];
+  final private JJCalls[] jj_2_rtns = new JJCalls[8];
   private boolean jj_rescan = false;
   private int jj_gc = 0;
 
@@ -560,7 +529,7 @@ import edu.ucsd.grammar.WhereClauseType;
 
   private void jj_rescan_token() {
     jj_rescan = true;
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 8; i++) {
     try {
       JJCalls p = jj_2_rtns[i];
       do {
@@ -575,8 +544,6 @@ import edu.ucsd.grammar.WhereClauseType;
             case 5: jj_3_6(); break;
             case 6: jj_3_7(); break;
             case 7: jj_3_8(); break;
-            case 8: jj_3_9(); break;
-            case 9: jj_3_10(); break;
           }
         }
         p = p.next;
@@ -640,7 +607,7 @@ import edu.ucsd.grammar.WhereClauseType;
 
                 public ContainsConstraint(String variableName, String function, String functionParameter) {
                         this.variableName = variableName;
-                        this.function = function.substring(1);
+                        this.function = function.substring(1);;
                         this.functionParameter = functionParameter;
                 }
 

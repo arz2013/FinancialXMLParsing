@@ -147,7 +147,7 @@ WhereClause WHERE_CLAUSE() :
 }
 {
 	<KWWHERE>
-	(WORD_CONSTRAINT(whereClause) | CONTAINS_CONSTRAINT(whereClause))
+	WORD_CONSTRAINT(whereClause)
 	(<WHERE_CLAUSE_CONNECTOR>
 	 (WORD_CONSTRAINT(whereClause) | CONTAINS_CONSTRAINT(whereClause))
 	)*

@@ -92,12 +92,7 @@ public class ParsedQuery<F extends ForClauseType<F>, W extends WhereClauseType<W
 		}
 		
 		// Check assignments are valid
-		Map<String, VariableTypes> varNameToTypes = new HashMap<String, VariableTypes>();
-		for(ForClauseType forClauseType : this.forClause.getClauses()) {
-			if(forClauseType.getFunctionName() == null) {
-				varNameToTypes.put(forClauseType.getVariableAsString(), forClauseType.getVariableTypes(forClauseType.getVariableAsString()));
-			}
-		}
+		Map<String, VariableTypes> varNameToTypes = this.getForClauseVariableDeclarations();
 		
 		variableAssignments = clauses.stream().filter(w -> w.getFunctionParameter() == null).map(w-> w.getVariableName()).collect(Collectors.toCollection(HashSet::new));
 		
@@ -127,6 +122,27 @@ public class ParsedQuery<F extends ForClauseType<F>, W extends WhereClauseType<W
 			}
 		}
 		
+		// Functions in for clause are only applicable to words
+		Map<String, VariableTypes> varNameToTypes = this.getForClauseVariableDeclarations();
+		Set<F> assignments = clauses.stream().filter(f -> f.getFunctionName() != null).collect(Collectors.toSet());
+		for(F varAssignment : assignments) {
+			String varName = varAssignment.getParameterAsString();
+			if(!VariableTypes.WORD.equals(varNameToTypes.get(varName))) {
+				throw new ValidationException("Function is only applicable to Words.");
+			}
+		}
+		
 		return variablesAsSet;
+	}
+	
+	private Map<String, VariableTypes> getForClauseVariableDeclarations() {
+		Map<String, VariableTypes> varNameToTypes = new HashMap<String, VariableTypes>();
+		for(ForClauseType forClauseType : this.forClause.getClauses()) {
+			if(forClauseType.getFunctionName() == null) {
+				varNameToTypes.put(forClauseType.getVariableAsString(), forClauseType.getVariableTypes(forClauseType.getVariableAsString()));
+			}
+		}
+		
+		return varNameToTypes;
 	}
 }

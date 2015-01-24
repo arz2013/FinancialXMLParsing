@@ -18,6 +18,9 @@ public class QueryTest {
 	public ExpectedException duplicateParametersInForClause = ExpectedException.none();
 	
 	@Rule
+	public ExpectedException invalidParameterTypeInForClause = ExpectedException.none();
+	
+	@Rule
 	public ExpectedException undeclaredParametersInWhereClause = ExpectedException.none();
 	
 	@Rule
@@ -55,6 +58,13 @@ public class QueryTest {
 		duplicateParametersInForClause.expect(ValidationException.class);
 		duplicateParametersInForClause.expectMessage("Duplicate Parameters in for clause.");
 		Query.createQuery("for w:Word , w:Sentence, p = shortest_term_starting_with(w), s:Sentence where w = 'Walt' and s.contains(w) return s");
+	}
+	
+	@Test
+	public void testInvalidParameterTypeInForClause() throws ParseException {
+		invalidParameterTypeInForClause.expect(ValidationException.class);
+		invalidParameterTypeInForClause.expectMessage("Function is only applicable to Words.");
+		Query.createQuery("for w:Word , p = shortest_term_starting_with(s), s:Sentence where w = 'Walt' and s.contains(w) return s");		
 	}
 	
 	@Test

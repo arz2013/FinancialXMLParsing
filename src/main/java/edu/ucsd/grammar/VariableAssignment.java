@@ -43,4 +43,9 @@ public class VariableAssignment implements ForClauseType<VariableAssignment> {
 	public String getParameterAsString() {
 		return this.argument;
 	}	
+	
+	public VariableTypes getInferredType() {
+		// For now all functions will return phrases
+		return VariableTypes.PHRASE;
+	}
 }

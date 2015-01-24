@@ -3,7 +3,8 @@ package edu.ucsd.grammar;
 public enum VariableTypes {
 	WORD("Word", true, false), 
 	SENTENCE("Sentence", false, true), 
-	DOCUMENT("Document", false, true);
+	DOCUMENT("Document", false, true),
+	PHRASE("Phrase", false, false);
 	
 	private String friendlyString;
 	private boolean acceptAssignment;

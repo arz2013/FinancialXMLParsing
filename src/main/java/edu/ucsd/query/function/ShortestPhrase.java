@@ -34,18 +34,23 @@ public class ShortestPhrase implements Function<VariableAssignment, ShortestPhra
 	
 	@Override
 	public ShortestPhraseResult evaluate(VariableAssignment variableAssignment, ParsedQuery query) {
-		ShortestPhraseResult result = null;
-		
 		if(!variableAssignment.getFunctionName().equals(FUNCTION_NAME)) {
 			throw new IllegalArgumentException("Wrong function argument"); 
 		}
 		
 		String parameterValue = query.findParameterValue(variableAssignment.getArgument());
-		System.out.println(parameterValue);
 		List<Word> words = queryFunctionDao.getWord(parameterValue);
-		System.out.println("Number of words: " + words.size());
+		return new ShortestPhraseResult(lookForShortestPhrase(words));
+	}
+
+	private String lookForShortestPhrase(List<Word> words) {
+		String shortestPhrase = null;
 		
-		return result;
+		for(Word word : words) {
+			
+		}
+		
+		return shortestPhrase;
 	}
 
 }

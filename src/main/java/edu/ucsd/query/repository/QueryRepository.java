@@ -7,7 +7,7 @@ import org.springframework.data.neo4j.repository.GraphRepository;
 
 import edu.ucsd.xmlparser.entity.Word;
 
-public interface QueryRepository extends GraphRepository {
+public interface QueryRepository extends GraphRepository<Word> {
 	@Query("match (w:Word{text:{0}}) return w")
 	public List<Word> getWordsByText(String text);
 }

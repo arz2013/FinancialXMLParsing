@@ -14,21 +14,30 @@
      					   http://www.springframework.org/schema/util/spring-util.xsd
 					       http://www.springframework.org/schema/tx
      					   http://www.springframework.org/schema/tx/spring-tx.xsd">
+    
     <neo4j:config graphDatabaseService="graphDatabaseService" base-package="edu.ucsd.xmlparser.entity"/>
-    <neo4j:repositories base-package="edu.ucsd.xmlparser.repository"/>
+    
+    <neo4j:repositories base-package="edu.ucsd.query.repository"/>
+    <neo4j:repositories base-package="edu.ucsd.xmlparser.repository"/>    
+    
     <tx:annotation-driven/>
   
-    <context:component-scan base-package="edu.ucsd.query.function.dao"/>  
+  	<context:component-scan base-package="edu.ucsd.query.function"/> 
+    <context:component-scan base-package="edu.ucsd.query.function.dao"/>
+     
     <context:component-scan base-package="edu.ucsd.xmlparser"/>
     <context:component-scan base-package="edu.ucsd.xmlparser.dao"/>
     <context:component-scan base-package="edu.ucsd.xmlparser.util"/>
-    
-    <bean name="financialXMLParser" class="edu.ucsd.xmlparser.FinancialXMLParser"/>
+ 
+ 	<!--   
+    <bean name="financialXMLParser" class="edu.ucsd.xmlparser.FinancialXMLParser" lazy-init="true" />
+    <bean name="stanfordParser" class="edu.ucsd.nlpparser.StanfordParser" init-method="initiate" />
+ 	-->
+ 	
     <bean name="graphDao" class="edu.ucsd.xmlparser.dao.GraphDao"/>
     <bean name="graphDatabaseUtils" class="edu.ucsd.xmlparser.util.GraphDatabaseUtils"/>
-    <bean name="stanfordParser" class="edu.ucsd.nlpparser.StanfordParser" init-method="initiate"/>
     
-    <bean name="queryExecutor" class="edu.ucsd.query.QueryExecutor"/>
+    <bean name="shortestPhraseFunction" class="edu.ucsd.query.function.ShortestPhrase"/>
   	<bean name="queryFunctionDao" class="edu.ucsd.query.dao.Neo4JQueryFunctionDaoImpl"/>
     <bean name="sentenceDao" class="edu.ucsd.xmlparser.dao.Neo4JSentenceDaoImpl"/>
  	

@@ -194,4 +194,8 @@ public class ParsedQuery<F extends ForClauseType<F>, W extends WhereClauseType<W
 		
 		return parameterValue;
 	}
+
+	public Set<VariableAssignment> allForClauseFunctions() {
+		return this.forClause.getAllFunctions().stream().map(f -> VariableAssignment.class.cast(f)).collect(Collectors.toSet()); 
+	}
 }

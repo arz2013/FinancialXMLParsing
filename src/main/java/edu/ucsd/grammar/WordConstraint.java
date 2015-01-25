@@ -6,7 +6,7 @@ class WordConstraint implements WhereClauseType<WordConstraint> {
 
 	public WordConstraint(String variableName, String variableValue) {
 		this.variableName = variableName;
-		this.variableValue = variableValue;;
+		this.variableValue = variableValue.replace("'", "").trim();
 	}
 
 	@Override

@@ -205,29 +205,6 @@ import edu.ucsd.grammar.WhereClauseType;
     finally { jj_save(7, xla); }
   }
 
-  private boolean jj_3R_4() {
-    if (jj_scan_token(IDENTIFIER)) return true;
-    if (jj_scan_token(VARIABLE_ASSIGNMENT)) return true;
-    if (jj_scan_token(FUNCTION)) return true;
-    return false;
-  }
-
-  private boolean jj_3_4() {
-    if (jj_3R_3()) return true;
-    return false;
-  }
-
-  private boolean jj_3_3() {
-    if (jj_scan_token(CLAUSE_SEPARATOR)) return true;
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3_4()) {
-    jj_scanpos = xsp;
-    if (jj_3_5()) return true;
-    }
-    return false;
-  }
-
   private boolean jj_3R_5() {
     if (jj_scan_token(IDENTIFIER)) return true;
     if (jj_scan_token(VARIABLE_ASSIGNMENT)) return true;
@@ -281,6 +258,29 @@ import edu.ucsd.grammar.WhereClauseType;
     if (jj_3_7()) {
     jj_scanpos = xsp;
     if (jj_3_8()) return true;
+    }
+    return false;
+  }
+
+  private boolean jj_3R_4() {
+    if (jj_scan_token(IDENTIFIER)) return true;
+    if (jj_scan_token(VARIABLE_ASSIGNMENT)) return true;
+    if (jj_scan_token(FUNCTION)) return true;
+    return false;
+  }
+
+  private boolean jj_3_4() {
+    if (jj_3R_3()) return true;
+    return false;
+  }
+
+  private boolean jj_3_3() {
+    if (jj_scan_token(CLAUSE_SEPARATOR)) return true;
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3_4()) {
+    jj_scanpos = xsp;
+    if (jj_3_5()) return true;
     }
     return false;
   }
@@ -569,65 +569,4 @@ import edu.ucsd.grammar.WhereClauseType;
     JJCalls next;
   }
 
-        }
-
-        class WordConstraint implements WhereClauseType<WordConstraint> {
-                private String variableName;
-                private String variableValue;
-
-                public WordConstraint(String variableName, String variableValue) {
-                        this.variableName = variableName;
-                        this.variableValue = variableValue;;
-                }
-
-                @Override
-                public String getVariableName() {
-                        return this.variableName;
-                }
-
-                @Override
-                public String getFunctionParameter() {
-                        return null;
-                }
-
-                public String getVariableValue() {
-                        return this.variableValue;
-                }
-
-                @Override
-                public boolean usesVariableName(String variableName) {
-                        return variableName.equals(this.variableName);
-                }
-        }
-
-        class ContainsConstraint implements WhereClauseType<ContainsConstraint> {
-                private String variableName;
-                private String function;
-                private String functionParameter;
-
-                public ContainsConstraint(String variableName, String function, String functionParameter) {
-                        this.variableName = variableName;
-                        this.function = function.substring(1);;
-                        this.functionParameter = functionParameter;
-                }
-
-                @Override
-                public String getVariableName() {
-                        return this.variableName;
-                }
-
-                @Override
-                public String getFunctionName() {
-                        return this.function;
-                }
-
-                @Override
-                public String getFunctionParameter() {
-                        return this.functionParameter;
-                }
-
-                @Override
-                public boolean usesVariableName(String variableName) {
-                        return variableName.equals(this.variableName) || variableName.equals(getFunctionParameter());
-                }
         }

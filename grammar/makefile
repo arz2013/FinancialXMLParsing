@@ -11,6 +11,7 @@ compile:
 
 copy-interfaces:
 	cp ../FinancialXMLParser/src/main/java/edu/ucsd/grammar/ContainTypeFunction.java .
+	cp ../FinancialXMLParser/src/main/java/edu/ucsd/grammar/ContainsConstraint.java .
 	cp ../FinancialXMLParser/src/main/java/edu/ucsd/grammar/ForClause.java .
 	cp ../FinancialXMLParser/src/main/java/edu/ucsd/grammar/ForClauseType.java .
 	cp ../FinancialXMLParser/src/main/java/edu/ucsd/grammar/VariableAssignment.java .
@@ -20,6 +21,7 @@ copy-interfaces:
 	cp ../FinancialXMLParser/src/main/java/edu/ucsd/grammar/VariableTypes.java .
 	cp ../FinancialXMLParser/src/main/java/edu/ucsd/grammar/WhereClause.java .
 	cp ../FinancialXMLParser/src/main/java/edu/ucsd/grammar/WhereClauseType.java .
+	cp ../FinancialXMLParser/src/main/java/edu/ucsd/grammar/WordConstraint.java .
 	cp ../FinancialXMLParser/src/main/java/edu/ucsd/grammar/ReturnClause.java .
 	cp ../FinancialXMLParser/src/main/java/edu/ucsd/grammar/TypeFunctions.java .
 	cp ../FinancialXMLParser/src/main/java/edu/ucsd/grammar/TypeFunction.java .

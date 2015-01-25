@@ -19,6 +19,7 @@ class WordConstraint implements WhereClauseType<WordConstraint> {
 		return null;
 	}
 
+	@Override
 	public String getVariableValue() {
 		return this.variableValue;
 	}

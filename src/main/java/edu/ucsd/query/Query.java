@@ -13,6 +13,10 @@ public class Query {
 		this.parsedQuery = parsedQuery;
 	}
 	
+	public ParsedQuery getParsedQuery() {
+		return this.parsedQuery;
+	}
+	
 	public static Query createQuery(String query) throws ParseException {
 		if(query == null) {
 			throw new IllegalArgumentException("Query string can not be null.");

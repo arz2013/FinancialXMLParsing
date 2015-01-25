@@ -186,7 +186,8 @@ public class ParsedQuery<F extends ForClauseType<F>, W extends WhereClauseType<W
 		for(W w : whereClauses) {
 			if(w.getFunctionName() == null) {
 				if(w.getVariableName().equals(argument)) {
-					// parameterValue = w.g
+					parameterValue = w.getVariableValue();
+					break;
 				}
 			}
 		}

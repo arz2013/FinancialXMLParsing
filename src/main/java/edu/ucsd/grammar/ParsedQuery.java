@@ -83,7 +83,14 @@ public class ParsedQuery<F extends ForClauseType<F>, W extends WhereClauseType<W
 		W whereClause = functionWhereClauses.remove(returnVariableName);
 		if(whereClause != null) { // return variable is specified as part of the where clause
 			filterCriteriaAssignments.remove(whereClause.getFunctionParameter());
+			Map<String, F> forClauseAssignments = this.forClause.getClauses().stream().filter(f -> f.getFunctionName() != null).collect(Collectors.toMap(f -> f.getVariableAsString(), f -> f));
+			F f = forClauseAssignments.remove(whereClause.getFunctionParameter());
+			if(f != null) {
+				filterCriteriaAssignments.remove(f.getParameterAsString());
+			}
 			if(functionWhereClauses.size() > 0 || filterCriteriaAssignments.size() > 0) {
+				System.err.println(functionWhereClauses);
+				System.err.println(filterCriteriaAssignments);
 				throw new ValidationException("Parameter is declared and set but does not contribute to the return statement.");
 			}
 		} else { // return variable is specified as part of the for clause

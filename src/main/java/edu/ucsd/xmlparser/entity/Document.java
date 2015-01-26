@@ -12,10 +12,6 @@ public class Document {
 	private int year;
 	private int documentNumber;
 	
-	@SuppressWarnings("unused")
-	private Document() {		
-	}
-	
 	public Document(String title, int year, int documentNumber) {
 		if(title == null) {
 			throw new IllegalArgumentException("Title can not be null");

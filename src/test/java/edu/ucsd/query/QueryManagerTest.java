@@ -32,6 +32,15 @@ public class QueryManagerTest {
 	}
 	
 	@Test
+	public void testDocumentShortestTerm() throws ParseException {
+		QueryResult<Set> result = queryManager.executeQuery(Query.createQuery("for d:Document, w:Word, p = shortest_term_starting_with(w) where w = 'Walt' and d.contains(p) return d").getParsedQuery(), Set.class);
+		Assert.assertEquals(1, result.getResult().size());
+		for(String res : (Set<String>)result.getResult()) {
+			System.out.println(res);
+		}
+	}
+	
+	@Test
 	public void testReturnWord() throws ParseException {
 		QueryResult<String> result = queryManager.executeQuery(Query.createQuery("for w:Word where w = 'Walt' return w").getParsedQuery(), String.class);
 		Assert.assertEquals(result.getResult(), "Walt");

@@ -30,7 +30,7 @@ public class DocumentContains implements Contains {
 
 	private Document getContainingDocument(Sentence sentence) {
 		Node sentenceNode = template.getNode(sentence.getId());
-		Iterator<Relationship> rels = sentenceNode.getRelationships(Direction.INCOMING, ApplicationRelationshipType.HAS_SENTENCE).iterator();
+		Iterator<Relationship> rels = sentenceNode.getRelationships(Direction.INCOMING, ApplicationRelationshipType.HAS_CHILD).iterator();
 
 		return this.template.findOne(rels.next().getOtherNode(sentenceNode).getId(), Document.class);
 	}

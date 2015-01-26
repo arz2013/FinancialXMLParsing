@@ -15,15 +15,15 @@ import edu.ucsd.xmlparser.entity.ApplicationRelationshipType;
 import edu.ucsd.xmlparser.entity.Document;
 import edu.ucsd.xmlparser.entity.Sentence;
 
-public class DocumentContains implements Contains<Document> {
+public class DocumentContains implements Contains {
 	@Inject
 	private Neo4jTemplate template;
 	
 	@Override
-	public Set<Document> contains(Set<Sentence> sentences) {
-		Set<Document> documents = new HashSet<Document>();
+	public Set<String> contains(Set<Sentence> sentences) {
+		Set<String> documents = new HashSet<String>();
 		for(Sentence sentence : sentences) {
-			documents.add(getContainingDocument(sentence));
+			documents.add(getContainingDocument(sentence).getTitle());
 		}
 		return documents;
 	}

@@ -4,6 +4,6 @@ import java.util.Set;
 
 import edu.ucsd.xmlparser.entity.Sentence;
 
-public interface Contains<P> {
-	Set<P> contains(Set<Sentence> sentences);
+public interface Contains {
+	Set<String> contains(Set<Sentence> sentences);
 }

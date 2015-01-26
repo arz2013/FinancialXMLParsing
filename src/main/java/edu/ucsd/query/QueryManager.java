@@ -8,9 +8,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import edu.ucsd.grammar.ParsedQuery;
 import edu.ucsd.grammar.VariableAssignment;
+import edu.ucsd.grammar.VariableTypes;
+import edu.ucsd.query.function.Contains;
 import edu.ucsd.query.function.Function;
 import edu.ucsd.query.function.ShortestPhrase;
 import edu.ucsd.system.SystemApplicationContext;
+import edu.ucsd.xmlparser.entity.Sentence; 
 
 public class QueryManager {
 	public <T> QueryResult<T> executeQuery(ParsedQuery<?, ?> parsedQuery, Class<T> type) {
@@ -37,12 +40,16 @@ public class QueryManager {
 			// We execute each function from the for clause to the where clause
 			// Once all functions have been executed, it must be the case that we have the final result
 			Set<VariableAssignment> variableAssignments = parsedQuery.allForClauseFunctions();
+			
+			Set<Sentence> containingSentences = null;
+			
 			for(VariableAssignment va : variableAssignments) {
 				if(va.getFunctionName().equals(ShortestPhrase.FUNCTION_NAME)) {
 					@SuppressWarnings("unchecked")
 					Function<VariableAssignment, ShortestPhrase.ShortestPhraseResult> sp = (Function<VariableAssignment, ShortestPhrase.ShortestPhraseResult>)SystemApplicationContext.getApplicationContext().getBean("shortestPhraseFunction");
 					ShortestPhrase.ShortestPhraseResult spr = sp.evaluate(va, parsedQuery);
 					varToResult.put(va.getVariableName(), spr.getText());
+					containingSentences = spr.getContainingSentences();
 				} else {
 					throw new IllegalArgumentException("Unrecognized function name");
 				}
@@ -52,6 +59,11 @@ public class QueryManager {
 			Object finalResult = varToResult.get(parsedQuery.getReturnClause().getVariableName());
 			if(finalResult != null) {
 				result = new QueryResult<T>(finalResult, type);
+			} else {
+				// We need to compute contains relationship
+				VariableTypes types = parsedQuery.getForClause().getVariableTypes(parsedQuery.getReturnClause().getVariableName());
+				Contains contains = (Contains)SystemApplicationContext.getApplicationContext().getBean(types.getContainsFunction());
+				result = new QueryResult<T>(contains.contains(containingSentences), type);
 			}
 			
 			return result;

@@ -91,12 +91,6 @@ public class ShortestPhrase implements Function<VariableAssignment, ShortestPhra
 					
 					shortestPhrase = stringBuilder.toString().trim();
 					currentShortestLength = sb.size();
-					
-					Set<Sentence> sentencesWithTheSameLength = this.lengthToSentences.get(sb.size());
-					if(sentencesWithTheSameLength == null) {
-						sentencesWithTheSameLength = new HashSet<Sentence>();
-					} 
-					sentencesWithTheSameLength.add(this.getContainingSentence(node));
 				}
 			}
 		}
@@ -113,6 +107,12 @@ public class ShortestPhrase implements Function<VariableAssignment, ShortestPhra
 		if(word.getProperty("posTag").equals(posTag)) {
 			sb.add((String)word.getProperty("text"));
 		} else {
+			Set<Sentence> sentencesWithTheSameLength = this.lengthToSentences.get(sb.size());
+			if(sentencesWithTheSameLength == null) {
+				sentencesWithTheSameLength = new HashSet<Sentence>();
+				this.lengthToSentences.put(sb.size(), sentencesWithTheSameLength);
+			} 
+			sentencesWithTheSameLength.add(this.getContainingSentence(word));
 			return;
 		}
 		

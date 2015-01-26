@@ -41,6 +41,9 @@
  	
  	<bean name="queryManagerInner" class="edu.ucsd.query.QueryManager.QueryManagerInnerImpl"/>
  	
+ 	<bean name="sentenceContains" class="edu.ucsd.query.function.SentenceContains"/>
+ 	<bean name="documentContains" class="edu.ucsd.query.function.DocumentContains"/>
+ 	
     <util:map id="config">
 		<entry key="enable_remote_shell" value="true"/>
 	</util:map>

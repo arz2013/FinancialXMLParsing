@@ -21,4 +21,14 @@ public class ForClause<T extends ForClauseType<T>> {
 	public Set<T> getAllFunctions() {
 		return clauses.stream().filter(t -> t.getFunctionName() != null).collect(Collectors.toSet());
 	}
+
+	public VariableTypes getVariableTypes(String variableName) {
+		for(T clause : clauses) {
+			if(clause.getVariableAsString().equals(variableName)) {
+				return clause.getVariableTypes(variableName);
+			}
+		}
+		
+		return null;
+	}
 }

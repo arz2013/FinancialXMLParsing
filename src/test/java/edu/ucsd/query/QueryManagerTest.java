@@ -1,5 +1,6 @@
 package edu.ucsd.query;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -15,6 +16,7 @@ public class QueryManagerTest {
 	
 	@Test
 	public void testFindShortestTerm() throws ParseException {
-		queryManager.executeQuery(Query.createQuery("for w:Word, p = shortest_term_starting_with(w) where w = 'Walt' return p").getParsedQuery());
+		QueryResult<String> result = queryManager.executeQuery(Query.createQuery("for w:Word, p = shortest_term_starting_with(w) where w = 'Walt' return p").getParsedQuery(), String.class);
+		Assert.assertEquals(result.getResult(), "Walt Disney");
 	}
 }

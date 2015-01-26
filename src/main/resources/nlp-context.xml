@@ -39,6 +39,8 @@
   	<bean name="queryFunctionDao" class="edu.ucsd.query.dao.Neo4JQueryFunctionDaoImpl"/>
     <bean name="sentenceDao" class="edu.ucsd.xmlparser.dao.Neo4JSentenceDaoImpl"/>
  	
+ 	<bean name="queryManagerInner" class="edu.ucsd.query.QueryManager.QueryManagerInnerImpl"/>
+ 	
     <util:map id="config">
 		<entry key="enable_remote_shell" value="true"/>
 	</util:map>

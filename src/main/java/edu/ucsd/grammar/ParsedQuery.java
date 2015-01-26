@@ -89,8 +89,6 @@ public class ParsedQuery<F extends ForClauseType<F>, W extends WhereClauseType<W
 				filterCriteriaAssignments.remove(f.getParameterAsString());
 			}
 			if(functionWhereClauses.size() > 0 || filterCriteriaAssignments.size() > 0) {
-				System.err.println(functionWhereClauses);
-				System.err.println(filterCriteriaAssignments);
 				throw new ValidationException("Parameter is declared and set but does not contribute to the return statement.");
 			}
 		} else { // return variable is specified as part of the for clause
@@ -204,5 +202,13 @@ public class ParsedQuery<F extends ForClauseType<F>, W extends WhereClauseType<W
 
 	public Set<VariableAssignment> allForClauseFunctions() {
 		return this.forClause.getAllFunctions().stream().map(f -> VariableAssignment.class.cast(f)).collect(Collectors.toSet()); 
+	}
+
+	public void fillInConstraint(Map<String, Object> varToResult) {
+		Set<W> wordConstraints = this.whereClause.getClauses().stream().filter(w->w.getFunctionParameter() == null).collect(Collectors.toSet());
+		for(W w : wordConstraints) {
+			varToResult.put(w.getVariableName(), w.getVariableValue());
+		}
+		
 	}
 }

@@ -1,7 +1,11 @@
 package edu.ucsd.query.function;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -17,6 +21,7 @@ import edu.ucsd.grammar.ParsedQuery;
 import edu.ucsd.grammar.VariableAssignment;
 import edu.ucsd.query.dao.QueryFunctionDao;
 import edu.ucsd.xmlparser.entity.ApplicationRelationshipType;
+import edu.ucsd.xmlparser.entity.Sentence;
 import edu.ucsd.xmlparser.entity.Word;
 
 public class ShortestPhrase implements Function<VariableAssignment, ShortestPhrase.ShortestPhraseResult> {
@@ -26,6 +31,10 @@ public class ShortestPhrase implements Function<VariableAssignment, ShortestPhra
 	
 	private final static int MIN_LENGTH = 2;
 	
+	private int currentShortestLength = 0;
+	
+	private Map<Integer, Set<Sentence>> lengthToSentences = new HashMap<Integer, Set<Sentence>>();
+	
 	@Inject
 	private QueryFunctionDao queryFunctionDao;
 	
@@ -34,13 +43,20 @@ public class ShortestPhrase implements Function<VariableAssignment, ShortestPhra
 	
 	public class ShortestPhraseResult {
 		private String text;
+		// We include the containing sentence to speed up certain retrieval results
+		private Set<Sentence> containingSentences;
 		
-		public ShortestPhraseResult(String text) {
+		public ShortestPhraseResult(String text, Set<Sentence> containingSentences) {
 			this.text = text;
+			this.containingSentences = containingSentences;
 		}
 
 		public String getText() {
 			return text;
+		}
+		
+		public Set<Sentence> getContainingSentences() {
+			return this.containingSentences;
 		}
 	}
 	
@@ -53,13 +69,12 @@ public class ShortestPhrase implements Function<VariableAssignment, ShortestPhra
 		
 		String parameterValue = query.findParameterValue(variableAssignment.getArgument());
 		List<Word> words = queryFunctionDao.getWord(parameterValue);
-		return new ShortestPhraseResult(lookForShortestPhrase(words));
+		String shortestPhrase = lookForShortestPhrase(words);
+		return new ShortestPhraseResult(shortestPhrase, lengthToSentences.get(currentShortestLength));
 	}
 
 	private String lookForShortestPhrase(List<Word> words) {
 		String shortestPhrase = null;
-		int length = 0;
-		
 		
 		for(Word word : words) {
 			List<String> sb = new ArrayList<String>();
@@ -68,18 +83,30 @@ public class ShortestPhrase implements Function<VariableAssignment, ShortestPhra
 			buildPhraseWithConsecutiveTag(sb, node, currentPosTag);
 			
 			if(sb.size() >= MIN_LENGTH) {
-				if(length == 0 || sb.size() < length) {
+				if(currentShortestLength == 0 || sb.size() < currentShortestLength) {
 					StringBuilder stringBuilder = new StringBuilder();
 					for(String s : sb) {
 						stringBuilder.append(s + " ");
 					}
+					
 					shortestPhrase = stringBuilder.toString().trim();
-					length = sb.size();
+					currentShortestLength = sb.size();
+					
+					Set<Sentence> sentencesWithTheSameLength = this.lengthToSentences.get(sb.size());
+					if(sentencesWithTheSameLength == null) {
+						sentencesWithTheSameLength = new HashSet<Sentence>();
+					} 
+					sentencesWithTheSameLength.add(this.getContainingSentence(node));
 				}
 			}
 		}
 		
 		return shortestPhrase;
+	}
+	
+	private Sentence getContainingSentence(Node word) {
+		Iterable<Relationship> rels = word.getRelationships(Direction.INCOMING, ApplicationRelationshipType.HAS_WORD);
+		return this.template.findOne(rels.iterator().next().getOtherNode(word).getId(), Sentence.class);
 	}
 	
 	private void buildPhraseWithConsecutiveTag(List<String> sb, Node word, String posTag) {

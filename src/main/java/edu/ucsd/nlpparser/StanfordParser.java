@@ -1,5 +1,6 @@
 package edu.ucsd.nlpparser;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -73,11 +74,20 @@ public class StanfordParser {
 		pipeline = new StanfordCoreNLP(props);
 	}
 	
+	/**
+	 * For every paragraph, there may be multiple sentences, which is why we return a list
+	 * 
+	 * @param text
+	 * @param noSentence
+	 * @return
+	 */
 	@Transactional(propagation=Propagation.REQUIRES_NEW)
-	public Sentence parseAndLoad(String text, int noSentence) {
+	public List<Sentence> parseAndLoad(String text, int noSentence) {
 		if(text == null) {
 			throw new IllegalArgumentException("Sentence can not be null");
 		}
+		
+		List<Sentence> result = new ArrayList<Sentence>();
 		
 		Sentence newSentence = null;
 
@@ -168,6 +178,8 @@ public class StanfordParser {
 			spts.performDepthFirstTraversal(tree);
 
 			seenWords.clear();
+			
+			result.add(newSentence);
 		}
 
 		// Process coreference
@@ -241,7 +253,7 @@ public class StanfordParser {
 			}
 		} // if (coreref is not null)
 		
-		return newSentence;
+		return result;
 	}
 	
 	private Node getRepresentativeNode(int sentenceNumber, int startIndex, int endIndex) {

@@ -23,16 +23,29 @@ public class DocumentContains implements Contains {
 	public Set<String> contains(Set<Sentence> sentences) {
 		Set<String> documents = new HashSet<String>();
 		for(Sentence sentence : sentences) {
-			documents.add(getContainingDocument(sentence).getTitle());
+			String title = getContainingDocument(sentence);
+			if(title != null) {
+				System.out.println("Getting not null for: " + sentence.getId() + " " + sentence.getText());
+				documents.add(title);
+			} else {
+				System.out.println("Getting null for: " + sentence.getId() + " " + sentence.getText());
+			}
 		}
 		return documents;
 	}
 
-	private Document getContainingDocument(Sentence sentence) {
+	private String getContainingDocument(Sentence sentence) {
+		String result = null;
 		Node sentenceNode = template.getNode(sentence.getId());
-		Iterator<Relationship> rels = sentenceNode.getRelationships(Direction.INCOMING, ApplicationRelationshipType.HAS_CHILD).iterator();
-
-		return this.template.findOne(rels.next().getOtherNode(sentenceNode).getId(), Document.class);
+		Iterator<Relationship> rels = sentenceNode.getRelationships(Direction.INCOMING).iterator();
+		while(rels.hasNext()) {
+			Relationship rel = rels.next();
+			if(ApplicationRelationshipType.HAS_SENTENCE.name().equals(rel.getType().name())) {
+				result = (String)rel.getStartNode().getProperty("title");
+				break;
+			}
+		}
+		return result;
 	}
 
 }

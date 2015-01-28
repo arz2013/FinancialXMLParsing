@@ -1,6 +1,7 @@
 package edu.ucsd.xmlparser;
 
 import java.io.File;
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.xml.parsers.DocumentBuilder; 
@@ -16,7 +17,6 @@ import org.w3c.dom.NodeList;
 import edu.ucsd.nlpparser.StanfordParser;
 import edu.ucsd.xmlparser.entity.ApplicationRelationshipType;
 import edu.ucsd.xmlparser.entity.Document;
-import edu.ucsd.xmlparser.entity.DocumentToSentence;
 import edu.ucsd.xmlparser.entity.NodeName;
 import edu.ucsd.xmlparser.entity.Sentence;
 import edu.ucsd.xmlparser.util.GraphDatabaseUtils;
@@ -53,10 +53,10 @@ public class FinancialXMLParser {
 		org.neo4j.graphdb.Node documentGraphNode = graphDatabaseUtils.toDocumentGraphNode(documentNode);
 		Document document = new Document(file.getName(), 2012, 1);
 		template.save(document);
-		visit(documentGraphNode, documentNode, document);
+		visit(documentGraphNode, documentNode, template.getNode(document.getId()));
 	}
 	
-	private void visit(org.neo4j.graphdb.Node graphNode, Node xmlNode, Document document) {
+	private void visit(org.neo4j.graphdb.Node graphNode, Node xmlNode, org.neo4j.graphdb.Node document) {
 		NodeList children = xmlNode.getChildNodes();
 		org.neo4j.graphdb.Node previousGraphChildNode = null;
 		
@@ -88,11 +88,13 @@ public class FinancialXMLParser {
 				String rawSentence = hashText.getNodeValue();
 				// IMPORTANT, this isn't a hard and fast rule, more like a hack for now
 				if(!(rawSentence.startsWith("% Change") && rawSentence.length() > 30 )) {
-					Sentence sentence = stanfordParser.parseAndLoad(hashText.getNodeValue(), this.sentenceNumber);
-					graphDatabaseUtils.createRelationship(graphNode, graphDatabaseUtils.getNode(sentence), ApplicationRelationshipType.HAS_CHILD);
-					DocumentToSentence docToSentence = new DocumentToSentence(document, sentence);
-					template.save(docToSentence);
-					this.sentenceNumber++;
+					List<Sentence> sentences = stanfordParser.parseAndLoad(hashText.getNodeValue(), this.sentenceNumber);
+					for(Sentence sentence : sentences) {
+						org.neo4j.graphdb.Node sentenceNode = graphDatabaseUtils.getNode(sentence);
+						graphDatabaseUtils.createRelationship(graphNode, sentenceNode, ApplicationRelationshipType.HAS_CHILD);
+						graphDatabaseUtils.createRelationship(document, sentenceNode, ApplicationRelationshipType.HAS_SENTENCE);
+						this.sentenceNumber = this.sentenceNumber + sentences.size();
+					}
 				}
 			}
 		}

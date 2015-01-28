@@ -24,12 +24,7 @@ public class DocumentContains implements Contains {
 		Set<String> documents = new HashSet<String>();
 		for(Sentence sentence : sentences) {
 			String title = getContainingDocument(sentence);
-			if(title != null) {
-				System.out.println("Getting not null for: " + sentence.getId() + " " + sentence.getText());
-				documents.add(title);
-			} else {
-				System.out.println("Getting null for: " + sentence.getId() + " " + sentence.getText());
-			}
+			documents.add(title);
 		}
 		return documents;
 	}

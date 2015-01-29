@@ -98,7 +98,6 @@ public class LongestPhrase implements
 
 				longestPhrase = stringBuilder.toString().trim();	
 				currentLongestLength = sentenceLength;
-				System.out.println(longestPhrase);
 			}
 			
 			Set<Sentence> sentencesWithTheSameLength = this.lengthToSentences.get(sentenceLength);

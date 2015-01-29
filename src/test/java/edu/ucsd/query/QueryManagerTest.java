@@ -17,14 +17,14 @@ public class QueryManagerTest {
 	}
 	
 	@Test
-	public void testFindShortestTerm() throws ParseException {
-		QueryResult<String> result = queryManager.executeQuery(Query.createQuery("for w:Word, p = shortest_term_starting_with(w) where w = 'Walt' return p").getParsedQuery(), String.class);
+	public void testFindShortestPhrase() throws ParseException {
+		QueryResult<String> result = queryManager.executeQuery(Query.createQuery("for w:Word, p = shortest_phrase_starting_with(w) where w = 'Walt' return p").getParsedQuery(), String.class);
 		Assert.assertEquals(result.getResult(), "Walt Disney");
 	}
 	
 	@Test
-	public void testSentenceShortestTerm() throws ParseException {
-		QueryResult<Set> result = queryManager.executeQuery(Query.createQuery("for s:Sentence, w:Word, p = shortest_term_starting_with(w) where w = 'Walt' and s.contains(p) return s").getParsedQuery(), Set.class);
+	public void testSentenceShortestPhrase() throws ParseException {
+		QueryResult<Set> result = queryManager.executeQuery(Query.createQuery("for s:Sentence, w:Word, p = shortest_phrase_starting_with(w) where w = 'Walt' and s.contains(p) return s").getParsedQuery(), Set.class);
 		Assert.assertEquals(6, result.getResult().size());
 		for(String res : (Set<String>)result.getResult()) {
 			System.out.println(res);
@@ -32,8 +32,8 @@ public class QueryManagerTest {
 	}
 	
 	@Test
-	public void testDocumentShortestTerm() throws ParseException {
-		QueryResult<Set> result = queryManager.executeQuery(Query.createQuery("for d:Document, w:Word, p = shortest_term_starting_with(w) where w = 'Walt' and d.contains(p) return d").getParsedQuery(), Set.class);
+	public void testDocumentShortestPhrase() throws ParseException {
+		QueryResult<Set> result = queryManager.executeQuery(Query.createQuery("for d:Document, w:Word, p = shortest_phrase_starting_with(w) where w = 'Walt' and d.contains(p) return d").getParsedQuery(), Set.class);
 		Assert.assertEquals(1, result.getResult().size());
 		for(String res : (Set<String>)result.getResult()) {
 			System.out.println(res);

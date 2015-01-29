@@ -25,7 +25,7 @@ import edu.ucsd.xmlparser.entity.Sentence;
 import edu.ucsd.xmlparser.entity.Word;
 
 public class ShortestPhrase implements Function<VariableAssignment, ShortestPhrase.ShortestPhraseResult> {
-	public final static String FUNCTION_NAME = "shortest_term_starting_with";
+	public final static String FUNCTION_NAME = "shortest_phrase_starting_with";
 	
 	private final static Logger logger = LoggerFactory.getLogger(ShortestPhrase.class);
 	

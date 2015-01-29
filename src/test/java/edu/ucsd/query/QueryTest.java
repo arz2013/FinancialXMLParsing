@@ -50,72 +50,72 @@ public class QueryTest {
 	
 	@Test
 	public void testValidQuery() throws ParseException {
-		Query query = Query.createQuery("for w:Word , p = shortest_term_starting_with(w), s:Sentence where w = 'Walt' and s.contains(w) return s");
+		Query query = Query.createQuery("for w:Word , p = shortest_phrase_starting_with(w), s:Sentence where w = 'Walt' and s.contains(w) return s");
 		assertTrue("Query is not null indicating successful parse.", query != null);
 		Query.createQuery("for w:Word where w = 'Walt' return w");
-		Query.createQuery("for w:Word, d:Document, p = shortest_term_starting_with(w) where w = 'Walt' and d.contains(p) return d");
-		Query.createQuery("for w:Word, p = shortest_term_starting_with(w) where w = 'Walt' return p");
+		Query.createQuery("for w:Word, d:Document, p = shortest_phrase_starting_with(w) where w = 'Walt' and d.contains(p) return d");
+		Query.createQuery("for w:Word, p = shortest_phrase_starting_with(w) where w = 'Walt' return p");
 	}
 	
 	@Test
 	public void testUndeclaredParametersInForClause() throws ParseException {
 		undeclaredParametersInForClause.expect(ValidationException.class);
 		undeclaredParametersInForClause.expectMessage("Undeclared variable used as parameter in for clause.");
-		Query.createQuery("for w:Word , p = shortest_term_starting_with(q), s:Sentence where w = 'Walt' and s.contains(w) return s");
+		Query.createQuery("for w:Word , p = shortest_phrase_starting_with(q), s:Sentence where w = 'Walt' and s.contains(w) return s");
 	}
 	
 	@Test
 	public void testDuplicateParametersInForClause() throws ParseException {
 		duplicateParametersInForClause.expect(ValidationException.class);
 		duplicateParametersInForClause.expectMessage("Duplicate Parameters in for clause.");
-		Query.createQuery("for w:Word , w:Sentence, p = shortest_term_starting_with(w), s:Sentence where w = 'Walt' and s.contains(w) return s");
+		Query.createQuery("for w:Word , w:Sentence, p = shortest_phrase_starting_with(w), s:Sentence where w = 'Walt' and s.contains(w) return s");
 	}
 	
 	@Test
 	public void testInvalidParameterTypeInForClause() throws ParseException {
 		invalidParameterTypeInForClause.expect(ValidationException.class);
 		invalidParameterTypeInForClause.expectMessage("Function is only applicable to Words.");
-		Query.createQuery("for w:Word , p = shortest_term_starting_with(s), s:Sentence where w = 'Walt' and s.contains(w) return s");		
+		Query.createQuery("for w:Word , p = shortest_phrase_starting_with(s), s:Sentence where w = 'Walt' and s.contains(w) return s");		
 	}
 	
 	@Test
 	public void testUndeclaredVariablesInWhereClause() throws ParseException {
 		undeclaredParametersInWhereClause.expect(ValidationException.class);
 		undeclaredParametersInWhereClause.expectMessage("Undeclared variable in where clause");
-		Query.createQuery("for w:Word , p = shortest_term_starting_with(w), s:Sentence where w = 'Walt' and w1 = 'Disney' and s.contains(w) return s");
+		Query.createQuery("for w:Word , p = shortest_phrase_starting_with(w), s:Sentence where w = 'Walt' and w1 = 'Disney' and s.contains(w) return s");
 	}
 	
 	@Test
 	public void testDuplicateVariablesInWhereClause() throws ParseException {
 		duplicateParametersInWhereClause.expect(ValidationException.class);
 		duplicateParametersInWhereClause.expectMessage("Duplicate Parameters in where clause.");
-		Query.createQuery("for w:Word , p = shortest_term_starting_with(w), s:Sentence where w = 'Walt' and w = 'Disney' and s.contains(w) return s");
+		Query.createQuery("for w:Word , p = shortest_phrase_starting_with(w), s:Sentence where w = 'Walt' and w = 'Disney' and s.contains(w) return s");
 	}
 	
 	@Test
 	public void testUndeclaredParametersInWhereClause() throws ParseException {
 		undeclaredVariableUsedAsParameterInWhereClause.expect(ValidationException.class);
 		undeclaredVariableUsedAsParameterInWhereClause.expectMessage("Undeclared variable used as parameter in where clause.");
-		Query.createQuery("for w:Word , p = shortest_term_starting_with(w), s:Sentence where w = 'Walt' and s.contains(w1) return s");
+		Query.createQuery("for w:Word , p = shortest_phrase_starting_with(w), s:Sentence where w = 'Walt' and s.contains(w1) return s");
 	}
 	
 	@Test(expected=TokenMgrError.class)
 	public void testParameterValueMustBeSingleStringInWhereClause() throws ParseException {
-		Query.createQuery("for w:Word , p = shortest_term_starting_with(w), s:Sentence where w = 'Walt Disney' and s.contains(w) return s");		
+		Query.createQuery("for w:Word , p = shortest_phrase_starting_with(w), s:Sentence where w = 'Walt Disney' and s.contains(w) return s");		
 	}
 	
 	@Test
 	public void testUnusedParameterInWhereClause1() throws ParseException {
 		unusedParameterInWhereClause.expect(ValidationException.class);
 		unusedParameterInWhereClause.expectMessage("Parameter is declared and set but does not contribute to the return statement.");
-		Query.createQuery("for w:Word , w1:Word, p = shortest_term_starting_with(w), s:Sentence where w = 'Walt' and w1 = 'Disney' and s.contains(w) return s");			
+		Query.createQuery("for w:Word , w1:Word, p = shortest_phrase_starting_with(w), s:Sentence where w = 'Walt' and w1 = 'Disney' and s.contains(w) return s");			
 	}
 	
 	@Test
 	public void testUnusedParameterInWhereClause2() throws ParseException {
 		unusedParameterInWhereClause.expect(ValidationException.class);
 		unusedParameterInWhereClause.expectMessage("Parameter is declared but does not contribute to the where and return statements.");
-		Query.createQuery("for w:Word , w1:Word, p = shortest_term_starting_with(w), s:Sentence where w = 'Walt' and s.contains(w) return w");			
+		Query.createQuery("for w:Word , w1:Word, p = shortest_phrase_starting_with(w), s:Sentence where w = 'Walt' and s.contains(w) return w");			
 	}
 	
 	@Test
@@ -129,7 +129,7 @@ public class QueryTest {
 	@Test
 	public void testInvalidFunctionCallInWhereClause() throws ParseException {
 		// Calling the contains function on a w 
-		// Query query = Query.createQuery("for w:Word , p = shortest_term_starting_with(w), s:Sentence where w = 'Walt' and w.contains(s) return s");
+		// Query query = Query.createQuery("for w:Word , p = shortest_phrase_starting_with(w), s:Sentence where w = 'Walt' and w.contains(s) return s");
 	}
 	
 	@Test
@@ -163,6 +163,6 @@ public class QueryTest {
 	public void testUndeclaredVariableInReturnClause() throws ParseException {
 		this.undeclaredVariableInReturnClause.expect(ValidationException.class);
 		this.undeclaredVariableInReturnClause.expectMessage("Undeclared variable in return clause.");
-		Query.createQuery("for w:Word , p = shortest_term_starting_with(w), s:Sentence where w = 'Walt' and s.contains(w) return s1");
+		Query.createQuery("for w:Word , p = shortest_phrase_starting_with(w), s:Sentence where w = 'Walt' and s.contains(w) return s1");
 	}
 }

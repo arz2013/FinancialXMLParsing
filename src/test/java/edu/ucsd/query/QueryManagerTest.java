@@ -45,4 +45,13 @@ public class QueryManagerTest {
 		QueryResult<String> result = queryManager.executeQuery(Query.createQuery("for w:Word where w = 'Walt' return w").getParsedQuery(), String.class);
 		Assert.assertEquals(result.getResult(), "Walt");
 	}
+	
+	@Test
+	public void testSentenceLongestPhrase() throws ParseException {
+		QueryResult<Set> result = queryManager.executeQuery(Query.createQuery("for s:Sentence, w:Word, p = longest_phrase_containing(w) where w = 'Disney' and s.contains(p) return s").getParsedQuery(), Set.class);
+		Assert.assertEquals(6, result.getResult().size());
+		for(String res : (Set<String>)result.getResult()) {
+			System.out.println(res);
+		}
+	}
 }

@@ -69,8 +69,8 @@ public class LongestPhrase implements
 		
 		String parameterValue = query.findParameterValue(variableAssignment.getArgument());
 		List<Word> words = queryFunctionDao.getWord(parameterValue);
-		String shortestPhrase = lookForLongestPhrase(words);
-		return new LongestPhraseResult(shortestPhrase, lengthToSentences.get(currentLongestLength));
+		String longestPhrase = lookForLongestPhrase(words);
+		return new LongestPhraseResult(longestPhrase, lengthToSentences.get(currentLongestLength));
 	}
 
 	private String lookForLongestPhrase(List<Word> words) {
@@ -85,25 +85,28 @@ public class LongestPhrase implements
 			List<String> prefix = new ArrayList<String>();
 			buildPrefixWithConsecutiveTag(prefix, node, currentPosTag);
 			
-			
-			StringBuilder stringBuilder = new StringBuilder();
-			for(String s: prefix) {
-				stringBuilder.append(s + " ");
-			}
-			
-			for(String s : sb) {
-				stringBuilder.append(s + " ");
-			}
-
-			longestPhrase = stringBuilder.toString().trim();				
-			
 			int sentenceLength = prefix.size() + sb.size();
+			if(currentLongestLength == 0 || sentenceLength > currentLongestLength) {
+				StringBuilder stringBuilder = new StringBuilder();
+				for(String s: prefix) {
+					stringBuilder.append(s + " ");
+				}
+			
+				for(String s : sb) {
+					stringBuilder.append(s + " ");
+				}
+
+				longestPhrase = stringBuilder.toString().trim();	
+				currentLongestLength = sentenceLength;
+				System.out.println(longestPhrase);
+			}
+			
 			Set<Sentence> sentencesWithTheSameLength = this.lengthToSentences.get(sentenceLength);
 			if(sentencesWithTheSameLength == null) {
 				sentencesWithTheSameLength = new HashSet<Sentence>();
 				this.lengthToSentences.put(sentenceLength, sentencesWithTheSameLength);
 			} 
-			sentencesWithTheSameLength.add(this.getContainingSentence(node));
+			sentencesWithTheSameLength.add(this.getContainingSentence(node));	
 		}
 		
 		return longestPhrase;
@@ -111,7 +114,7 @@ public class LongestPhrase implements
 	
 	private void buildPrefixWithConsecutiveTag(List<String> prefix, Node word,
 			String posTag) {
-		if(word.getProperty("posTag").equals(posTag)) {
+		if(word.hasProperty("posTag") && word.getProperty("posTag").equals(posTag)) {
 			prefix.add((String)word.getProperty("text"));
 		} else {
 			prefix.remove(0); // We need to remove this since we already get this from the suffix
@@ -121,7 +124,7 @@ public class LongestPhrase implements
 		
 		Iterable<Relationship> rels = word.getRelationships(Direction.INCOMING, ApplicationRelationshipType.NEXT_WORD);
 		if(rels.iterator().hasNext()) {
-			buildPhraseWithConsecutiveTag(prefix, rels.iterator().next().getEndNode(), posTag);
+			buildPrefixWithConsecutiveTag(prefix, rels.iterator().next().getStartNode(), posTag);
 		} 
 	}
 

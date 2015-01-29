@@ -21,6 +21,10 @@ public class DocumentContains implements Contains {
 	
 	@Override
 	public Set<String> contains(Set<Sentence> sentences) {
+		if(sentences == null || sentences.size() == 0) {
+			return new HashSet<String>();
+		}
+		
 		Set<String> documents = new HashSet<String>();
 		for(Sentence sentence : sentences) {
 			String title = getContainingDocument(sentence);

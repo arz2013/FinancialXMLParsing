@@ -54,4 +54,10 @@ public class QueryManagerTest {
 			System.out.println(res);
 		}
 	}
+	
+	@Test
+	public void testSentenceWordNotExistent() throws ParseException {
+		QueryResult<Set> result = queryManager.executeQuery(Query.createQuery("for d:Document, w:Word, p = shortest_phrase_starting_with(w) where w = 'Waltzy' and d.contains(p) return d").getParsedQuery(), Set.class);
+		Assert.assertTrue(result.getResult().size() == 0);	
+	}
 }

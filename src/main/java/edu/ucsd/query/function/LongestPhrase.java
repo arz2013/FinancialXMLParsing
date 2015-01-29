@@ -1,6 +1,7 @@
 package edu.ucsd.query.function;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -20,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 import edu.ucsd.grammar.ParsedQuery;
 import edu.ucsd.grammar.VariableAssignment;
 import edu.ucsd.query.dao.QueryFunctionDao;
-import edu.ucsd.query.function.ShortestPhrase.ShortestPhraseResult;
 import edu.ucsd.xmlparser.entity.ApplicationRelationshipType;
 import edu.ucsd.xmlparser.entity.Sentence;
 import edu.ucsd.xmlparser.entity.Word;
@@ -82,18 +82,49 @@ public class LongestPhrase implements
 			Node node = template.getNode(word.getId());
 			buildPhraseWithConsecutiveTag(sb, node, currentPosTag);
 			
+			List<String> prefix = new ArrayList<String>();
+			buildPrefixWithConsecutiveTag(prefix, node, currentPosTag);
+			
+			
 			StringBuilder stringBuilder = new StringBuilder();
+			for(String s: prefix) {
+				stringBuilder.append(s + " ");
+			}
+			
 			for(String s : sb) {
 				stringBuilder.append(s + " ");
 			}
 
-			longestPhrase = stringBuilder.toString().trim();
-					
+			longestPhrase = stringBuilder.toString().trim();				
+			
+			int sentenceLength = prefix.size() + sb.size();
+			Set<Sentence> sentencesWithTheSameLength = this.lengthToSentences.get(sentenceLength);
+			if(sentencesWithTheSameLength == null) {
+				sentencesWithTheSameLength = new HashSet<Sentence>();
+				this.lengthToSentences.put(sentenceLength, sentencesWithTheSameLength);
+			} 
+			sentencesWithTheSameLength.add(this.getContainingSentence(node));
 		}
 		
 		return longestPhrase;
 	}
 	
+	private void buildPrefixWithConsecutiveTag(List<String> prefix, Node word,
+			String posTag) {
+		if(word.getProperty("posTag").equals(posTag)) {
+			prefix.add((String)word.getProperty("text"));
+		} else {
+			prefix.remove(0); // We need to remove this since we already get this from the suffix
+			Collections.reverse(prefix);
+			return;
+		}
+		
+		Iterable<Relationship> rels = word.getRelationships(Direction.INCOMING, ApplicationRelationshipType.NEXT_WORD);
+		if(rels.iterator().hasNext()) {
+			buildPhraseWithConsecutiveTag(prefix, rels.iterator().next().getEndNode(), posTag);
+		} 
+	}
+
 	private Sentence getContainingSentence(Node word) {
 		Iterable<Relationship> rels = word.getRelationships(Direction.INCOMING, ApplicationRelationshipType.HAS_WORD);
 		return this.template.findOne(rels.iterator().next().getOtherNode(word).getId(), Sentence.class);
@@ -103,12 +134,6 @@ public class LongestPhrase implements
 		if(word.getProperty("posTag").equals(posTag)) {
 			sb.add((String)word.getProperty("text"));
 		} else {
-			Set<Sentence> sentencesWithTheSameLength = this.lengthToSentences.get(sb.size());
-			if(sentencesWithTheSameLength == null) {
-				sentencesWithTheSameLength = new HashSet<Sentence>();
-				this.lengthToSentences.put(sb.size(), sentencesWithTheSameLength);
-			} 
-			sentencesWithTheSameLength.add(this.getContainingSentence(word));
 			return;
 		}
 		

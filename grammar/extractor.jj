@@ -37,7 +37,7 @@ TOKEN : { < WORD : "'"(["a"-"z", "A"-"Z", "0"-"9", "_"])+"'" > }
    otherwise it will match Identifier first before Identifier Types 
    so more specific ones have to appear first */
 TOKEN : { < DOC_AND_SENTENCE_FUNCTION : "."("contains") > }
-TOKEN : { < FUNCTION : ("shortest_term_starting_with" | "longest_term_containing")  > }
+TOKEN : { < FUNCTION : ("shortest_term_starting_with" | "longest_phrase_containing")  > }
 TOKEN : { < WHERE_CLAUSE_CONNECTOR : ( "or" | "and" ) > }
 TOKEN : { < NOT : "not" > }
 TOKEN : { < IDENTIFIER_TYPES : ("Word" | "Sentence" | "Document") > }

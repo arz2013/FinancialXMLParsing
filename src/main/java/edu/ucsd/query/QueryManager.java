@@ -11,6 +11,7 @@ import edu.ucsd.grammar.VariableAssignment;
 import edu.ucsd.grammar.VariableTypes;
 import edu.ucsd.query.function.Contains;
 import edu.ucsd.query.function.Function;
+import edu.ucsd.query.function.LongestPhrase;
 import edu.ucsd.query.function.ShortestPhrase;
 import edu.ucsd.system.SystemApplicationContext;
 import edu.ucsd.xmlparser.entity.Sentence; 
@@ -43,6 +44,8 @@ public class QueryManager {
 			
 			Set<Sentence> containingSentences = null;
 			
+			// NEED REFACTORING to make adding new functions easier
+			// The problem is we don't know what functions will be there in the future
 			for(VariableAssignment va : variableAssignments) {
 				if(va.getFunctionName().equals(ShortestPhrase.FUNCTION_NAME)) {
 					@SuppressWarnings("unchecked")
@@ -50,6 +53,12 @@ public class QueryManager {
 					ShortestPhrase.ShortestPhraseResult spr = sp.evaluate(va, parsedQuery);
 					varToResult.put(va.getVariableName(), spr.getText());
 					containingSentences = spr.getContainingSentences();
+				} else if(va.getFunctionName().equals(LongestPhrase.FUNCTION_NAME)) {
+					@SuppressWarnings("unchecked")
+					Function<VariableAssignment, LongestPhrase.LongestPhraseResult> lp = (Function<VariableAssignment, LongestPhrase.LongestPhraseResult>)SystemApplicationContext.getApplicationContext().getBean("longestPhraseFunction");
+					LongestPhrase.LongestPhraseResult lpr = lp.evaluate(va, parsedQuery);
+					varToResult.put(va.getVariableName(), lpr.getText());
+					containingSentences = lpr.getContainingSentences();
 				} else {
 					throw new IllegalArgumentException("Unrecognized function name");
 				}

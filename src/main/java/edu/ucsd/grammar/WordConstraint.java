@@ -1,6 +1,6 @@
 package edu.ucsd.grammar;
 
-class WordConstraint implements WhereClauseType<WordConstraint> {
+public class WordConstraint implements WhereClauseType<WordConstraint> {
 	private String variableName;
 	private String variableValue;
 	private String variableContext;
@@ -12,7 +12,9 @@ class WordConstraint implements WhereClauseType<WordConstraint> {
 	public WordConstraint(String variableName, String variableValue, String variableContext) {
 		this.variableName = variableName;
 		this.variableValue = variableValue.replace("'", "").trim();
-		this.variableContext = variableContext;
+		if(variableContext != null) {
+			this.variableContext = variableContext.replace("'", "").trim();
+		}
 	}
 
 	@Override

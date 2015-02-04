@@ -187,13 +187,13 @@ public class ParsedQuery<F extends ForClauseType<F>, W extends WhereClauseType<W
 		return varNameToTypes;
 	}
 
-	public String findParameterValue(String argument) {
-		String parameterValue = null;
+	public W findParameterValue(String argument) {
+		W parameterValue = null;
 		Set<W> whereClauses = this.whereClause.getClauses();
 		for(W w : whereClauses) {
 			if(w.getFunctionName() == null) {
 				if(w.getVariableName().equals(argument)) {
-					parameterValue = w.getVariableValue();
+					parameterValue = w;
 					break;
 				}
 			}

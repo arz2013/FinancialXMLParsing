@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import edu.ucsd.grammar.ParsedQuery;
 import edu.ucsd.grammar.VariableAssignment;
+import edu.ucsd.grammar.WordConstraint;
 import edu.ucsd.query.dao.QueryFunctionDao;
 import edu.ucsd.xmlparser.entity.ApplicationRelationshipType;
 import edu.ucsd.xmlparser.entity.Sentence;
@@ -67,8 +68,14 @@ public class ShortestPhrase implements Function<VariableAssignment, ShortestPhra
 			throw new IllegalArgumentException("Wrong function argument"); 
 		}
 		
-		String parameterValue = query.findParameterValue(variableAssignment.getArgument());
-		List<Word> words = queryFunctionDao.getWord(parameterValue);
+		WordConstraint parameter = (WordConstraint)query.findParameterValue(variableAssignment.getArgument());
+		List<Word> words = null;
+		if(parameter.getVariableContext() == null) {
+			words = queryFunctionDao.getWord(parameter.getVariableValue());
+		} else {
+			words = queryFunctionDao.getWord(parameter.getVariableValue(), parameter.getVariableContext().toUpperCase());
+		}
+		
 		String shortestPhrase = lookForShortestPhrase(words);
 		return new ShortestPhraseResult(shortestPhrase, lengthToSentences.get(currentShortestLength));
 	}

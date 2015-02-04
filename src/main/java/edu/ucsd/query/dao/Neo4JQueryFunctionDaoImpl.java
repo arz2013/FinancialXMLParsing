@@ -15,4 +15,9 @@ public class Neo4JQueryFunctionDaoImpl implements QueryFunctionDao {
 	public List<Word> getWord(String word) {
 		return queryRepository.getWordsByText(word);
 	}
+
+	@Override
+	public List<Word> getWord(String word, String context) {
+		return queryRepository.getWordsByTextAndContext(word, context);
+	}
 }

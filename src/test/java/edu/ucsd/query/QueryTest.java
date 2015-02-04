@@ -54,6 +54,7 @@ public class QueryTest {
 		assertTrue("Query is not null indicating successful parse.", query != null);
 		Query.createQuery("for w:Word where w = 'Walt' return w");
 		Query.createQuery("for w:Word, d:Document, p = shortest_phrase_starting_with(w) where w = 'Walt' and d.contains(p) return d");
+		Query.createQuery("for w:Word, d:Document, p = shortest_phrase_starting_with(w) where w = ('Walt', 'Person') and d.contains(p) return d");
 		Query.createQuery("for w:Word, p = shortest_phrase_starting_with(w) where w = 'Walt' return p");
 	}
 	

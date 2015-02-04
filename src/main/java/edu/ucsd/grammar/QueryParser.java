@@ -100,8 +100,8 @@ import edu.ucsd.grammar.WhereClauseType;
           variableName = t.image;
     jj_consume_token(IDENTIFIER_TYPE_SEPARATOR);
     t = jj_consume_token(IDENTIFIER_TYPES);
-          variableType = t.image;
-          forClause.addClauseType(new VariableDeclaration(variableName, variableType));
+         variableType = t.image;
+                 forClause.addClauseType(new VariableDeclaration(variableName, variableType));
   }
 
   final public void VARIABLE_ASSIGNMENT(ForClause forClause) throws ParseException {
@@ -123,14 +123,41 @@ import edu.ucsd.grammar.WhereClauseType;
 
   final public void WORD_CONSTRAINT(WhereClause whereClause) throws ParseException {
         Token t;
-        String variableName;
+        String variableName = null;
         String variableValue;
     t = jj_consume_token(IDENTIFIER);
           variableName = t.image;
     jj_consume_token(VARIABLE_ASSIGNMENT);
+    if (jj_2_9(3)) {
+      WORD_ONLY(whereClause, variableName);
+    } else if (jj_2_10(3)) {
+      WORD_WITH_CONTEXT(whereClause, variableName);
+    } else {
+      jj_consume_token(-1);
+      throw new ParseException();
+    }
+  }
+
+  final public void WORD_ONLY(WhereClause whereClause, String variableName) throws ParseException {
+        Token t;
+        String variableValue;
     t = jj_consume_token(WORD);
                 variableValue = t.image;
                 whereClause.addClauseType(new WordConstraint(variableName, variableValue));
+  }
+
+  final public void WORD_WITH_CONTEXT(WhereClause whereClause, String variableName) throws ParseException {
+        Token t;
+        String variableValue;
+        String variableContext;
+    jj_consume_token(OPEN_PAR);
+    t = jj_consume_token(WORD);
+                variableValue = t.image;
+    jj_consume_token(CLAUSE_SEPARATOR);
+    t = jj_consume_token(WORD_CONTEXT);
+                variableContext = t.image;
+                whereClause.addClauseType(new WordConstraint(variableName, variableValue, variableContext));
+    jj_consume_token(CLOSE_PAR);
   }
 
   final public void CONTAINS_CONSTRAINT(WhereClause whereClause) throws ParseException {
@@ -205,15 +232,27 @@ import edu.ucsd.grammar.WhereClauseType;
     finally { jj_save(7, xla); }
   }
 
-  private boolean jj_3R_5() {
-    if (jj_scan_token(IDENTIFIER)) return true;
-    if (jj_scan_token(VARIABLE_ASSIGNMENT)) return true;
-    if (jj_scan_token(WORD)) return true;
-    return false;
+  private boolean jj_2_9(int xla) {
+    jj_la = xla; jj_lastpos = jj_scanpos = token;
+    try { return !jj_3_9(); }
+    catch(LookaheadSuccess ls) { return true; }
+    finally { jj_save(8, xla); }
+  }
+
+  private boolean jj_2_10(int xla) {
+    jj_la = xla; jj_lastpos = jj_scanpos = token;
+    try { return !jj_3_10(); }
+    catch(LookaheadSuccess ls) { return true; }
+    finally { jj_save(9, xla); }
   }
 
   private boolean jj_3_5() {
     if (jj_3R_4()) return true;
+    return false;
+  }
+
+  private boolean jj_3_10() {
+    if (jj_3R_8()) return true;
     return false;
   }
 
@@ -222,15 +261,13 @@ import edu.ucsd.grammar.WhereClauseType;
     return false;
   }
 
-  private boolean jj_3R_6() {
-    if (jj_scan_token(IDENTIFIER)) return true;
-    if (jj_scan_token(DOC_AND_SENTENCE_FUNCTION)) return true;
-    if (jj_scan_token(OPEN_PAR)) return true;
+  private boolean jj_3_1() {
+    if (jj_3R_3()) return true;
     return false;
   }
 
-  private boolean jj_3_1() {
-    if (jj_3R_3()) return true;
+  private boolean jj_3R_7() {
+    if (jj_scan_token(WORD)) return true;
     return false;
   }
 
@@ -269,8 +306,27 @@ import edu.ucsd.grammar.WhereClauseType;
     return false;
   }
 
+  private boolean jj_3_9() {
+    if (jj_3R_7()) return true;
+    return false;
+  }
+
   private boolean jj_3_4() {
     if (jj_3R_3()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_8() {
+    if (jj_scan_token(OPEN_PAR)) return true;
+    if (jj_scan_token(WORD)) return true;
+    if (jj_scan_token(CLAUSE_SEPARATOR)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_6() {
+    if (jj_scan_token(IDENTIFIER)) return true;
+    if (jj_scan_token(DOC_AND_SENTENCE_FUNCTION)) return true;
+    if (jj_scan_token(OPEN_PAR)) return true;
     return false;
   }
 
@@ -281,6 +337,18 @@ import edu.ucsd.grammar.WhereClauseType;
     if (jj_3_4()) {
     jj_scanpos = xsp;
     if (jj_3_5()) return true;
+    }
+    return false;
+  }
+
+  private boolean jj_3R_5() {
+    if (jj_scan_token(IDENTIFIER)) return true;
+    if (jj_scan_token(VARIABLE_ASSIGNMENT)) return true;
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3_9()) {
+    jj_scanpos = xsp;
+    if (jj_3_10()) return true;
     }
     return false;
   }
@@ -304,7 +372,7 @@ import edu.ucsd.grammar.WhereClauseType;
    private static void jj_la1_init_0() {
       jj_la1_0 = new int[] {};
    }
-  final private JJCalls[] jj_2_rtns = new JJCalls[8];
+  final private JJCalls[] jj_2_rtns = new JJCalls[10];
   private boolean jj_rescan = false;
   private int jj_gc = 0;
 
@@ -488,7 +556,7 @@ import edu.ucsd.grammar.WhereClauseType;
   /** Generate ParseException. */
   public ParseException generateParseException() {
     jj_expentries.clear();
-    boolean[] la1tokens = new boolean[22];
+    boolean[] la1tokens = new boolean[23];
     if (jj_kind >= 0) {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
@@ -502,7 +570,7 @@ import edu.ucsd.grammar.WhereClauseType;
         }
       }
     }
-    for (int i = 0; i < 22; i++) {
+    for (int i = 0; i < 23; i++) {
       if (la1tokens[i]) {
         jj_expentry = new int[1];
         jj_expentry[0] = i;
@@ -529,7 +597,7 @@ import edu.ucsd.grammar.WhereClauseType;
 
   private void jj_rescan_token() {
     jj_rescan = true;
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < 10; i++) {
     try {
       JJCalls p = jj_2_rtns[i];
       do {
@@ -544,6 +612,8 @@ import edu.ucsd.grammar.WhereClauseType;
             case 5: jj_3_6(); break;
             case 6: jj_3_7(); break;
             case 7: jj_3_8(); break;
+            case 8: jj_3_9(); break;
+            case 9: jj_3_10(); break;
           }
         }
         p = p.next;

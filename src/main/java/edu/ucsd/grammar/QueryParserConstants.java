@@ -21,29 +21,31 @@ public interface QueryParserConstants {
   /** RegularExpression Id. */
   int DIGIT = 9;
   /** RegularExpression Id. */
-  int WORD = 10;
+  int WORD_CONTEXT = 10;
   /** RegularExpression Id. */
-  int DOC_AND_SENTENCE_FUNCTION = 11;
+  int WORD = 11;
   /** RegularExpression Id. */
-  int FUNCTION = 12;
+  int DOC_AND_SENTENCE_FUNCTION = 12;
   /** RegularExpression Id. */
-  int WHERE_CLAUSE_CONNECTOR = 13;
+  int FUNCTION = 13;
   /** RegularExpression Id. */
-  int NOT = 14;
+  int WHERE_CLAUSE_CONNECTOR = 14;
   /** RegularExpression Id. */
-  int IDENTIFIER_TYPES = 15;
+  int NOT = 15;
   /** RegularExpression Id. */
-  int IDENTIFIER = 16;
+  int IDENTIFIER_TYPES = 16;
   /** RegularExpression Id. */
-  int IDENTIFIER_TYPE_SEPARATOR = 17;
+  int IDENTIFIER = 17;
   /** RegularExpression Id. */
-  int VARIABLE_ASSIGNMENT = 18;
+  int IDENTIFIER_TYPE_SEPARATOR = 18;
   /** RegularExpression Id. */
-  int OPEN_PAR = 19;
+  int VARIABLE_ASSIGNMENT = 19;
   /** RegularExpression Id. */
-  int CLOSE_PAR = 20;
+  int OPEN_PAR = 20;
   /** RegularExpression Id. */
-  int CLAUSE_SEPARATOR = 21;
+  int CLOSE_PAR = 21;
+  /** RegularExpression Id. */
+  int CLAUSE_SEPARATOR = 22;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -60,6 +62,7 @@ public interface QueryParserConstants {
     "\"return\"",
     "<LETTER>",
     "<DIGIT>",
+    "<WORD_CONTEXT>",
     "<WORD>",
     "<DOC_AND_SENTENCE_FUNCTION>",
     "<FUNCTION>",

@@ -40,6 +40,8 @@ public class ParsedQuery<F extends ForClauseType<F>, W extends WhereClauseType<W
 		List<String> variableNames = clauses.stream().filter(w -> w.getVariableName() != null).map(w -> w.getVariableName()).collect(Collectors.toList());
 		Set<String> variableNamesAsSet = variableNames.stream().collect(Collectors.toCollection(HashSet::new));
 		if(variableNamesAsSet.size() < variableNames.size()) {
+			System.out.println(variableNamesAsSet);
+			System.out.println(variableNames);
 			throw new ValidationException("Duplicate Parameters in where clause.");
 		}
 		for(String variableName : variableNamesAsSet) {

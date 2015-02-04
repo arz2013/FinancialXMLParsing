@@ -32,6 +32,7 @@ TOKEN : { < KWWHERE : "where" > }
 TOKEN : { < KWRETURN : "return" > }
 TOKEN : { < #LETTER : ["a"-"z", "A"-"Z"] > } 
 TOKEN : { < #DIGIT : (["0"-"9"])+ > }
+TOKEN : { < WORD_CONTEXT : "'"("Person" | "Organization")"'" > }
 TOKEN : { < WORD : "'"(["a"-"z", "A"-"Z", "0"-"9", "_"])+"'" > }
 /* The Identifier Types have to appear before the more generic Identifier
    otherwise it will match Identifier first before Identifier Types 
@@ -116,8 +117,8 @@ void IDENTIFIER_TYPE_DECLARATION(ForClause forClause) :
 	<IDENTIFIER_TYPE_SEPARATOR>
 	(t = <IDENTIFIER_TYPES>)
 	{ 
-          variableType = t.image; 
-	  forClause.addClauseType(new VariableDeclaration(variableName, variableType)); 
+         variableType = t.image; 
+	  	 forClause.addClauseType(new VariableDeclaration(variableName, variableType)); 
 	}
 }
 
@@ -144,18 +145,48 @@ void VARIABLE_ASSIGNMENT(ForClause forClause) :
 void WORD_CONSTRAINT(WhereClause whereClause) : 
 {
 	Token t;
-	String variableName;
+	String variableName = null;
 	String variableValue;
 }
 {
 	(t = <IDENTIFIER>)
 	{ variableName = t.image; }
 	<VARIABLE_ASSIGNMENT>
+	(WORD_ONLY(whereClause, variableName) | WORD_WITH_CONTEXT(whereClause, variableName))	
+}
+
+void WORD_ONLY(WhereClause whereClause, String variableName) :
+{
+	Token t;
+	String variableValue;
+}
+{
 	(t = <WORD>)
 	{ 
 		variableValue = t.image;
 		whereClause.addClauseType(new WordConstraint(variableName, variableValue));
 	} 
+}
+
+void WORD_WITH_CONTEXT(WhereClause whereClause, String variableName) :
+{
+	Token t;
+	String variableValue;
+	String variableContext;
+}
+{
+	<OPEN_PAR>
+	(t = <WORD>)
+	{ 
+		variableValue = t.image;
+	}
+	<CLAUSE_SEPARATOR>
+	(t = <WORD_CONTEXT>)
+	{
+		variableContext = t.image;
+		whereClause.addClauseType(new WordConstraint(variableName, variableValue, variableContext));
+	}
+	<CLOSE_PAR> 
 }
 
 void CONTAINS_CONSTRAINT(WhereClause whereClause) :

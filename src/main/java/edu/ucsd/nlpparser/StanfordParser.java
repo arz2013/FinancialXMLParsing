@@ -82,7 +82,7 @@ public class StanfordParser {
 	 * @return
 	 */
 	@Transactional(propagation=Propagation.REQUIRES_NEW)
-	public List<Sentence> parseAndLoad(String text, int noSentence) {
+	public List<Sentence> parseAndLoad(String text, int noSentence, Map<String, Integer> termAndFrequency) {
 		if(text == null) {
 			throw new IllegalArgumentException("Sentence can not be null");
 		}

@@ -1,7 +1,9 @@
 package edu.ucsd.xmlparser;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 import javax.xml.parsers.DocumentBuilder; 
@@ -53,10 +55,11 @@ public class FinancialXMLParser {
 		org.neo4j.graphdb.Node documentGraphNode = graphDatabaseUtils.toDocumentGraphNode(documentNode);
 		Document document = new Document(file.getName(), 2012, 1);
 		template.save(document);
-		visit(documentGraphNode, documentNode, template.getNode(document.getId()));
+		Map<String, Integer> termAndFrequency = new HashMap<String, Integer>();
+		visit(documentGraphNode, documentNode, template.getNode(document.getId()), termAndFrequency);
 	}
 	
-	private void visit(org.neo4j.graphdb.Node graphNode, Node xmlNode, org.neo4j.graphdb.Node document) {
+	private void visit(org.neo4j.graphdb.Node graphNode, Node xmlNode, org.neo4j.graphdb.Node document, Map<String, Integer> termAndFrequency) {
 		NodeList children = xmlNode.getChildNodes();
 		org.neo4j.graphdb.Node previousGraphChildNode = null;
 		
@@ -81,14 +84,14 @@ public class FinancialXMLParser {
 				}
 
 				previousGraphChildNode = graphChildNode;
-				visit(graphChildNode, childNode, document);
+				visit(graphChildNode, childNode, document, termAndFrequency);
 			} else {
 				Node hashText = childNode.getFirstChild();
 				logger.info("Sentence Number : " + this.sentenceNumber + " with value : " + hashText.getNodeValue());
 				String rawSentence = hashText.getNodeValue();
 				// IMPORTANT, this isn't a hard and fast rule, more like a hack for now
 				if(!(rawSentence.startsWith("% Change") && rawSentence.length() > 30 )) {
-					List<Sentence> sentences = stanfordParser.parseAndLoad(hashText.getNodeValue(), this.sentenceNumber);
+					List<Sentence> sentences = stanfordParser.parseAndLoad(hashText.getNodeValue(), this.sentenceNumber, termAndFrequency);
 					for(Sentence sentence : sentences) {
 						org.neo4j.graphdb.Node sentenceNode = graphDatabaseUtils.getNode(sentence);
 						graphDatabaseUtils.createRelationship(graphNode, sentenceNode, ApplicationRelationshipType.HAS_CHILD);

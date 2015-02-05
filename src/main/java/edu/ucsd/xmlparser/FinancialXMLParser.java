@@ -71,7 +71,8 @@ public class FinancialXMLParser {
 	}
 	
 	private void computeCValue(Map<String, Integer> termAndFrequency) {
-		List<CValueData> cValueDatas = termAndFrequency.keySet().stream().filter(t -> (termAndFrequency.get(t) > 2)).map(t -> new CValueData(t, termAndFrequency.get(t), new StringTokenizer(t).countTokens())).collect(Collectors.toList());
+		System.out.println("Number of terms raw: " + termAndFrequency.size());
+		List<CValueData> cValueDatas = termAndFrequency.keySet().stream().filter(t -> (termAndFrequency.get(t) > 1)).map(t -> new CValueData(t, termAndFrequency.get(t), new StringTokenizer(t).countTokens())).collect(Collectors.toList());
 		Collections.sort(cValueDatas, new Comparator<CValueData>() {
 			@Override
 			public int compare(CValueData o1, CValueData o2) {
@@ -82,6 +83,13 @@ public class FinancialXMLParser {
 		System.out.println("Number of Terms : " + cValueDatas.size());
 		
 		File fout = new File("cvalue.txt");
+		
+		Collections.sort(cValueDatas, new Comparator<CValueData>() {
+			@Override
+			public int compare(CValueData o1, CValueData o2) {
+				return o2.getCValue().compareTo(o1.getCValue());
+			}
+		});
 		
 		try(BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fout)))) {
 			for(CValueData d : cValueDatas) {

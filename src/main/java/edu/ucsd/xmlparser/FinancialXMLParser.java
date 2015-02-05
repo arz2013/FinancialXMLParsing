@@ -1,6 +1,10 @@
 package edu.ucsd.xmlparser;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -76,8 +80,16 @@ public class FinancialXMLParser {
 		});
 		CValueCalculator.calculate(cValueDatas);
 		System.out.println("Number of Terms : " + cValueDatas.size());
-		for(CValueData d : cValueDatas) {
-			System.out.println(d.getPhrase() + " " + d.getCValue());
+		
+		File fout = new File("cvalue.txt");
+		
+		try(BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fout)))) {
+			for(CValueData d : cValueDatas) {
+				bw.write(d.getPhrase() + " " + d.getCValue());
+				bw.newLine();
+			}
+		} catch(IOException ioe) {
+			System.err.println(ioe.getMessage());
 		}
 	}
 

@@ -1,9 +1,13 @@
 package edu.ucsd.xmlparser;
 
 import java.io.File;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.StringTokenizer;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.xml.parsers.DocumentBuilder; 
@@ -16,6 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import edu.ucsd.cvalue.CValueCalculator;
+import edu.ucsd.cvalue.CValueData;
 import edu.ucsd.nlpparser.StanfordParser;
 import edu.ucsd.xmlparser.entity.ApplicationRelationshipType;
 import edu.ucsd.xmlparser.entity.Document;
@@ -57,8 +63,24 @@ public class FinancialXMLParser {
 		template.save(document);
 		Map<String, Integer> termAndFrequency = new HashMap<String, Integer>();
 		visit(documentGraphNode, documentNode, template.getNode(document.getId()), termAndFrequency);
+		computeCValue(termAndFrequency);
 	}
 	
+	private void computeCValue(Map<String, Integer> termAndFrequency) {
+		List<CValueData> cValueDatas = termAndFrequency.keySet().stream().filter(t -> (termAndFrequency.get(t) > 2)).map(t -> new CValueData(t, termAndFrequency.get(t), new StringTokenizer(t).countTokens())).collect(Collectors.toList());
+		Collections.sort(cValueDatas, new Comparator<CValueData>() {
+			@Override
+			public int compare(CValueData o1, CValueData o2) {
+				return new Integer(o2.getPhraseLength()).compareTo(new Integer(o1.getPhraseLength()));
+			}
+		});
+		CValueCalculator.calculate(cValueDatas);
+		System.out.println("Number of Terms : " + cValueDatas.size());
+		for(CValueData d : cValueDatas) {
+			System.out.println(d.getPhrase() + " " + d.getCValue());
+		}
+	}
+
 	private void visit(org.neo4j.graphdb.Node graphNode, Node xmlNode, org.neo4j.graphdb.Node document, Map<String, Integer> termAndFrequency) {
 		NodeList children = xmlNode.getChildNodes();
 		org.neo4j.graphdb.Node previousGraphChildNode = null;

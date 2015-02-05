@@ -29,6 +29,9 @@ import edu.stanford.nlp.ling.CoreAnnotations.PartOfSpeechAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.TextAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
+import edu.stanford.nlp.ling.tokensregex.MultiPatternMatcher;
+import edu.stanford.nlp.ling.tokensregex.SequenceMatchResult;
+import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.trees.GrammaticalStructure;
@@ -56,6 +59,8 @@ public class StanfordParser {
 	
 	private StanfordCoreNLP pipeline;
 	
+	private MultiPatternMatcher<CoreMap> multiPatternMatcher;
+	
 	@Inject
 	public void setSentenceDao(SentenceDao sentenceDao) {
 		this.sentenceDao = sentenceDao;
@@ -72,6 +77,13 @@ public class StanfordParser {
 				+ "it, pos, lemma, ner, parse"); // Remove dcoref
 		// props.put("dcoref.score", true);
 		pipeline = new StanfordCoreNLP(props);
+		
+		List<TokenSequencePattern> patterns = new ArrayList<TokenSequencePattern>();
+		patterns.add(TokenSequencePattern.compile("[{tag: NN}]+[tag: NN]"));
+		patterns.add(TokenSequencePattern.compile("[{tag: /JJ|NN/}]+[tag: NN]"));
+		patterns.add(TokenSequencePattern.compile("( ([{tag: /JJ|NN/}]+) | ( ([{tag: /JJ|NN/}]*)([{tag: IN}]?) )([{tag: /JJ|NN/}]*) )[tag:NN]"));
+		 
+		multiPatternMatcher = TokenSequencePattern.getMultiPatternMatcher(patterns);
 	}
 	
 	/**
@@ -122,6 +134,16 @@ public class StanfordParser {
 			newSentence = Sentence.newSentence(sentence.get(TextAnnotation.class), noSentence);
 
 			newSentence.addWord(root);
+			
+			List<SequenceMatchResult<CoreMap>> results = multiPatternMatcher.findNonOverlapping(sentence.get(TokensAnnotation.class));
+			for(SequenceMatchResult<CoreMap> res : results) {
+				Integer frequency = termAndFrequency.get(res.group());					
+				if(frequency == null) {
+					termAndFrequency.put(res.group(), 1);
+				} else {
+					termAndFrequency.put(res.group(), frequency++);
+				}	
+			}
 
 			for (CoreLabel token: sentence.get(TokensAnnotation.class)) {
 				// this is the text of the token

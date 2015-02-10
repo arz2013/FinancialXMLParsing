@@ -163,4 +163,8 @@ public class Word {
 		}
 		
 	}
+	
+	public boolean neTagNotNullOrO() {
+		return this.neTag != null && !this.neTag.equals("O");
+	}
 }

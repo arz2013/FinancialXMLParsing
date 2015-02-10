@@ -1,11 +1,18 @@
 package edu.ucsd.nlpparser;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.index.Index;
+import org.neo4j.graphdb.index.IndexManager;
+import org.neo4j.helpers.collection.MapUtil;
 import org.springframework.data.neo4j.support.Neo4jTemplate;
 
 import edu.stanford.nlp.trees.Tree;
@@ -29,6 +36,8 @@ public class StanfordParseTreeSaver {
 	private Sentence sentence;
 	private Map<Word.TextAndPosition, Word> seenWords;
 	private Neo4jTemplate template;
+	private Map<Node, List<Word>> parentToWordsPhrase;
+	private Index<Node> fullTextAndNeTagPhrase;
 	
 	private boolean isExcludeRoot = true;
 	
@@ -55,6 +64,10 @@ public class StanfordParseTreeSaver {
 		this.template = template;
 		this.sentence = sentence;
 		this.seenWords = seenWords;
+		this.parentToWordsPhrase = new HashMap<Node, List<Word>>();
+		IndexManager indexManager = template.getGraphDatabaseService().index();
+		// Specify a Lucene Index
+		this.fullTextAndNeTagPhrase = indexManager.forNodes("phrase-fulltext", MapUtil.stringMap( IndexManager.PROVIDER, "lucene", "type", "fulltext"));
 	}
 	
 	public void performDepthFirstTraversal(Tree tree) {
@@ -63,7 +76,51 @@ public class StanfordParseTreeSaver {
 		}
 		
 		innerDepthFirstTraversal(tree, null);
+		createPhraseIndex();
 	}
+	
+	private void createPhraseIndex() {
+		for(Node parseNode : this.parentToWordsPhrase.keySet()) {
+			List<Word> children = this.parentToWordsPhrase.get(parseNode);
+			constructPhrase(parseNode, children);
+		}
+	}
+
+	private void constructPhrase(Node parseNode, List<Word> children) {
+		String phrase = null;
+		String neTag = null;
+		
+		Collections.sort(children, new Comparator<Word>() {
+
+			@Override
+			public int compare(Word o1, Word o2) {
+				return new Integer(o1.getPosition()).compareTo(o2.getPosition());
+			}
+			
+		});
+		
+		boolean containsNeededNeTag = false;
+		
+		StringBuffer sb = new StringBuffer();
+		boolean neTagNotNullOrO = false;
+		
+		for(Word word : children) {
+			neTagNotNullOrO = word.neTagNotNullOrO();
+			containsNeededNeTag = containsNeededNeTag || neTagNotNullOrO;
+			if(neTagNotNullOrO) {
+				neTag = word.getNeTag();
+			}
+			sb.append(word.getText());
+			sb.append(" ");
+		}
+		
+		if(containsNeededNeTag) {
+			phrase = sb.toString().trim();			
+			this.fullTextAndNeTagPhrase.add(parseNode, "phrase", phrase);
+			this.fullTextAndNeTagPhrase.add(parseNode, "nameEntityTag", neTag);
+		}
+	}
+
 	
 	private Node innerDepthFirstTraversal(Tree tree, NonLeafParseNode parent) {
 		List<Tree> children = tree.getChildrenAsList();
@@ -74,10 +131,29 @@ public class StanfordParseTreeSaver {
 
 			Word word = Word.newWord(tree.value(), inOrder.size());
 			word = seenWords.get(word.getTextAndPosition());
+			
+
+			Node mostCommonParent = null;
+			
+			// Get parent of parent
+			// We want to index the phrase
+			Iterable<Relationship> relationship = template.getNode(parent.getId()).getRelationships(Direction.INCOMING);
+			if(relationship.iterator().hasNext()) {
+				mostCommonParent = relationship.iterator().next().getStartNode();
+			} else {
+				mostCommonParent = template.getNode(parent.getId());
+			}
+			
+			List<Word> words = this.parentToWordsPhrase.get(mostCommonParent);
+			if(words == null) {
+				words = new ArrayList<Word>();
+				this.parentToWordsPhrase.put(mostCommonParent, words);
+			}
+			
+			words.add(word);
+			
 			sentenceDao.save(new NonLeafToLeaf(parent, word));
-			
-			// template.createRelationshipBetween(template.getNode(parent.getId()), template.getNode(word.getId()), Rel.FIRST_CHILD.name(), new HashMap<String, Object>());
-			
+						
 			return template.getNode(word.getId());
 		} else {
 			if(currentNode.isRoot() && !isExcludeRoot) { // Check if the current node is root and whether root needs to be excluded

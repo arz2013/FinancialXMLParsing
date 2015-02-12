@@ -101,45 +101,44 @@ public class FinancialXMLParser {
 		}
 	}
 
-	private void visit(org.neo4j.graphdb.Node graphNode, Node xmlNode, org.neo4j.graphdb.Node document, Map<String, Integer> termAndFrequency) {
+	private void visit(org.neo4j.graphdb.Node graphNode, Node xmlNode, org.neo4j.graphdb.Node document, Map<String, Integer> documentTermAndFrequency) {
 		NodeList children = xmlNode.getChildNodes();
 		org.neo4j.graphdb.Node previousGraphChildNode = null;
 		
 		for(int i = 0; i < children.getLength(); i++) {			
 			Node childNode = children.item(i);
-			// Check for Paragraph Node for special handling
-			boolean isParagraph = isParagraphTextNode(childNode);
-			
-			if(!isParagraph) {
-				org.neo4j.graphdb.Node graphChildNode = graphDatabaseUtils.toGraphNode(childNode);
+		
+			org.neo4j.graphdb.Node graphChildNode = graphDatabaseUtils.toGraphNode(childNode);
 
-				// Create Relationship(s) between Parent and Child
-				graphDatabaseUtils.createRelationship(graphNode, graphChildNode, ApplicationRelationshipType.HAS_CHILD);
-				// Create a special Relationship if this is the first child processed
-				if(i == 0) {
-					graphDatabaseUtils.createRelationship(graphNode, graphChildNode, ApplicationRelationshipType.FIRST_CHILD);
-				}
+			// Create Relationship(s) between Parent and Child
+			graphDatabaseUtils.createRelationship(graphNode, graphChildNode, ApplicationRelationshipType.HAS_CHILD);
+			// Create a special Relationship if this is the first child processed
+			if(i == 0) {
+				graphDatabaseUtils.createRelationship(graphNode, graphChildNode, ApplicationRelationshipType.FIRST_CHILD);
+			}
 
-				// Create Relationship between Siblings
-				if(previousGraphChildNode != null) {
-					graphDatabaseUtils.createRelationship(previousGraphChildNode, graphChildNode, ApplicationRelationshipType.NEXT);
-				}
+			// Create Relationship between Siblings
+			if(previousGraphChildNode != null) {
+				graphDatabaseUtils.createRelationship(previousGraphChildNode, graphChildNode, ApplicationRelationshipType.NEXT);
+			}
 
-				previousGraphChildNode = graphChildNode;
-				visit(graphChildNode, childNode, document, termAndFrequency);
-			} else {
-				Node hashText = childNode.getFirstChild();
-				logger.info("Sentence Number : " + this.sentenceNumber + " with value : " + hashText.getNodeValue());
-				String rawSentence = hashText.getNodeValue();
-				// IMPORTANT, this isn't a hard and fast rule, more like a hack for now
-				if(!(rawSentence.startsWith("% Change") && rawSentence.length() > 30 )) {
-					List<Sentence> sentences = stanfordParser.parseAndLoad(hashText.getNodeValue(), this.sentenceNumber, termAndFrequency);
-					for(Sentence sentence : sentences) {
-						org.neo4j.graphdb.Node sentenceNode = graphDatabaseUtils.getNode(sentence);
-						graphDatabaseUtils.createRelationship(graphNode, sentenceNode, ApplicationRelationshipType.HAS_CHILD);
-						graphDatabaseUtils.createRelationship(document, sentenceNode, ApplicationRelationshipType.HAS_SENTENCE);
-						this.sentenceNumber = this.sentenceNumber + sentences.size();
-					}
+			previousGraphChildNode = graphChildNode;
+			visit(graphChildNode, childNode, document, documentTermAndFrequency);
+		} 
+		
+		// Parent Node is null for the top level of the document
+		if(xmlNode.getParentNode() != null && isParentParagraphNode(xmlNode.getParentNode())) {
+			Node hashText = xmlNode;
+			logger.info("Sentence Number : " + this.sentenceNumber + " with value : " + hashText.getNodeValue());
+			String rawSentence = hashText.getNodeValue();
+			// IMPORTANT, this isn't a hard and fast rule, more like a hack for now
+			if(!(rawSentence.startsWith("% Change") && rawSentence.length() > 30 )) {
+				List<Sentence> sentences = stanfordParser.parseAndLoad(hashText.getNodeValue(), this.sentenceNumber, documentTermAndFrequency);
+				for(Sentence sentence : sentences) {
+					org.neo4j.graphdb.Node sentenceNode = graphDatabaseUtils.getNode(sentence);
+					graphDatabaseUtils.createRelationship(graphNode, sentenceNode, ApplicationRelationshipType.HAS_CHILD);
+					graphDatabaseUtils.createRelationship(document, sentenceNode, ApplicationRelationshipType.HAS_SENTENCE);
+					this.sentenceNumber = this.sentenceNumber + sentences.size();
 				}
 			}
 		}
@@ -155,5 +154,10 @@ public class FinancialXMLParser {
 	private boolean isParagraphTextNode(Node childNode) {
 		return NodeName.PARAGRAPH.getTextName().equals(childNode.getNodeName()) && childNode.getChildNodes().getLength() == 1 &&
 				childNode.getFirstChild().getNodeName().equals(NodeName.HASH_TEXT.getTextName());
+	}
+	
+	private boolean isParentParagraphNode(Node node) {
+		return NodeName.PARAGRAPH.getTextName().equals(node.getNodeName()) && node.getChildNodes().getLength() == 1 &&
+				node.getFirstChild().getNodeName().equals(NodeName.HASH_TEXT.getTextName());
 	}
 }

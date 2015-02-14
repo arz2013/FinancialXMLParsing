@@ -119,6 +119,20 @@ public class FinancialXMLParser {
 		boolean isSection = false;
 		boolean isIndependentParagraphSection = false;
 		
+		// Root node does not have a parent
+		if(xmlNode.getParentNode() != null) {
+			// Are we in a <P> within a <Sect>, if not then sectionId has to be null and we will see a P
+			if(isSection(xmlNode)) {
+				sectionId = graphNode.getId();
+				isSection = true;
+				sectionTermAndFrequency = new HashMap<String, CValueRawFrequency>();
+			} else if(sectionId == null && NodeName.PARAGRAPH.getTextName().equals(xmlNode.getNodeName())) {
+				sectionId = graphNode.getId();
+				isIndependentParagraphSection = true;
+				sectionTermAndFrequency = new HashMap<String, CValueRawFrequency>();
+			}
+		}
+		
 		for(int i = 0; i < children.getLength(); i++) {			
 			Node childNode = children.item(i);
 		
@@ -137,28 +151,11 @@ public class FinancialXMLParser {
 			}
 
 			previousGraphChildNode = graphChildNode;
-
-			// Root node does not have a parent
-			if(xmlNode.getParentNode() != null) {
-				// Are we in a <P> within a <Sect>, if not then sectionId has to be null and we will see a P
-				if(isSection(xmlNode)) {
-					sectionId = graphNode.getId();
-					isSection = true;
-					sectionTermAndFrequency = new HashMap<String, CValueRawFrequency>();
-				} else if(sectionId == null && NodeName.PARAGRAPH.getTextName().equals(xmlNode.getNodeName())) {
-					sectionId = graphNode.getId();
-					isIndependentParagraphSection = true;
-					sectionTermAndFrequency = new HashMap<String, CValueRawFrequency>();
-				}
-			}
 			
 			visit(graphChildNode, childNode, document, documentTermAndFrequency, sectionId, sectionTermAndFrequency);
-			// Need to update the document ones with section id of this section based on intersection
-			if(isSection || isIndependentParagraphSection) {
-				updateDocumentCValueRawFrequency(sectionId, documentTermAndFrequency, sectionTermAndFrequency);
-				this.computeCValueAndPersist(sectionTermAndFrequency, ReferenceType.SECTION);
-			} 
+			
 		} 
+		
 		
 		// Parent Node is null for the top level of the document
 		if(xmlNode.getParentNode() != null && isParentParagraphNode(xmlNode.getParentNode())) {
@@ -176,6 +173,12 @@ public class FinancialXMLParser {
 				}
 			}
 		}
+		
+		// Need to update the document ones with section id of this section based on intersection
+		if(isSection || isIndependentParagraphSection) {
+			updateDocumentCValueRawFrequency(sectionId, documentTermAndFrequency, sectionTermAndFrequency);
+			this.computeCValueAndPersist(sectionTermAndFrequency, ReferenceType.SECTION);
+		} 
 	}
 
 	private void updateDocumentCValueRawFrequency(Long sectionId,

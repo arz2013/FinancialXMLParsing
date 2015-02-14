@@ -71,6 +71,10 @@ public class FinancialXMLParser {
 	
 	private void computeCValueAndPersist(Map<String, CValueRawFrequency> termAndFrequency, ReferenceType refType) {
 		System.out.println("Number of terms raw: " + termAndFrequency.size());
+		if(termAndFrequency.size() == 0) {
+			return;
+		}
+		
 		List<CValueData> cValueDatas = termAndFrequency.keySet().stream().filter(t -> (termAndFrequency.get(t).getFrequency() > 0)).map(t -> new CValueData(t, termAndFrequency.get(t).getFrequency(), new StringTokenizer(t).countTokens())).collect(Collectors.toList());
 		Collections.sort(cValueDatas, new Comparator<CValueData>() {
 			@Override

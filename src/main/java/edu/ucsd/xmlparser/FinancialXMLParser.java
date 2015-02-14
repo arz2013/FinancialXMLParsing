@@ -1,10 +1,6 @@
 package edu.ucsd.xmlparser;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -197,11 +193,6 @@ public class FinancialXMLParser {
 	 * @param childNode
 	 * @return
 	 */
-	private boolean isParagraphTextNode(Node childNode) {
-		return NodeName.PARAGRAPH.getTextName().equals(childNode.getNodeName()) && childNode.getChildNodes().getLength() == 1 &&
-				childNode.getFirstChild().getNodeName().equals(NodeName.HASH_TEXT.getTextName());
-	}
-	
 	private boolean isParentParagraphNode(Node node) {
 		return NodeName.PARAGRAPH.getTextName().equals(node.getNodeName()) && node.getChildNodes().getLength() == 1 &&
 				node.getFirstChild().getNodeName().equals(NodeName.HASH_TEXT.getTextName());

@@ -18,6 +18,7 @@ import org.springframework.data.neo4j.support.Neo4jTemplate;
 import edu.stanford.nlp.trees.Tree;
 import edu.ucsd.xmlparser.dao.SentenceDao;
 import edu.ucsd.xmlparser.entity.ApplicationRelationshipType;
+import edu.ucsd.xmlparser.entity.NameEntityPhraseNode;
 import edu.ucsd.xmlparser.entity.NonLeafParseNode;
 import edu.ucsd.xmlparser.entity.NonLeafToLeaf;
 import edu.ucsd.xmlparser.entity.ParseChild;
@@ -70,23 +71,23 @@ public class StanfordParseTreeSaver {
 		this.fullTextAndNeTagPhrase = indexManager.forNodes("phrase-fulltext", MapUtil.stringMap( IndexManager.PROVIDER, "lucene", "type", "fulltext"));
 	}
 	
-	public void performDepthFirstTraversal(Tree tree) {
+	public void performDepthFirstTraversal(Tree tree, Long sectionId) {
 		if(tree == null) {
 			throw new IllegalArgumentException("Argument Tree can not be null");
 		}
 		
 		innerDepthFirstTraversal(tree, null);
-		createPhraseIndex();
+		createPhraseIndex(sectionId);
 	}
 	
-	private void createPhraseIndex() {
+	private void createPhraseIndex(Long sectionId) {
 		for(Node parseNode : this.parentToWordsPhrase.keySet()) {
 			List<Word> children = this.parentToWordsPhrase.get(parseNode);
-			constructPhrase(parseNode, children);
+			constructPhrase(parseNode, children, sectionId);
 		}
 	}
 
-	private void constructPhrase(Node parseNode, List<Word> children) {
+	private void constructPhrase(Node parseNode, List<Word> children, Long sectionId) {
 		String phrase = null;
 		String neTag = null;
 		
@@ -115,9 +116,13 @@ public class StanfordParseTreeSaver {
 		}
 		
 		if(containsNeededNeTag) {
-			phrase = sb.toString().trim();			
+			phrase = sb.toString().trim();
+			NameEntityPhraseNode phraseNode = new NameEntityPhraseNode(phrase, neTag, sectionId, sentence.getId());
+			template.save(phraseNode);
+			/*
 			this.fullTextAndNeTagPhrase.add(parseNode, "phrase", phrase);
 			this.fullTextAndNeTagPhrase.add(parseNode, "nameEntityTag", neTag);
+			*/
 		}
 	}
 

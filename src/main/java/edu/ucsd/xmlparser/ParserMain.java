@@ -9,7 +9,7 @@ import edu.ucsd.system.SystemApplicationContext;
 public class ParserMain {
 
 	public static void main(String[] args) throws Exception {
-		File financialFile = new File(ParserMain.class.getClassLoader().getResource("sample-financial.xml").getFile());
+		File financialFile = new File(ParserMain.class.getClassLoader().getResource("ShortenedTestDocument.xml").getFile());
 		ApplicationContext context = SystemApplicationContext.getApplicationContext();
 		FinancialXMLParser parser = FinancialXMLParser.class.cast(context.getBean("financialXMLParser"));
 		parser.parseAndLoad(financialFile);

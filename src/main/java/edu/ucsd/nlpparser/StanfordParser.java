@@ -91,10 +91,11 @@ public class StanfordParser {
 	 * 
 	 * @param text
 	 * @param noSentence
+	 * @param sectionId 
 	 * @return
 	 */
 	@Transactional(propagation=Propagation.REQUIRES_NEW)
-	public List<Sentence> parseAndLoad(String text, int noSentence, Map<String, Integer> termAndFrequency) {
+	public List<Sentence> parseAndLoad(String text, int noSentence, Map<String, Integer> termAndFrequency, Long sectionId) {
 		if(text == null) {
 			throw new IllegalArgumentException("Sentence can not be null");
 		}
@@ -197,7 +198,7 @@ public class StanfordParser {
 
 			// Now save the parse trees as well
 			StanfordParseTreeSaver spts = new StanfordParseTreeSaver(sentenceDao, template, newSentence, seenWords);
-			spts.performDepthFirstTraversal(tree);
+			spts.performDepthFirstTraversal(tree, sectionId);
 
 			seenWords.clear();
 			

@@ -66,7 +66,7 @@ public class FinancialXMLParser {
 		Document document = new Document(file.getName(), 2012, 1);
 		template.save(document);
 		Map<String, Integer> termAndFrequency = new HashMap<String, Integer>();
-		visit(documentGraphNode, documentNode, template.getNode(document.getId()), termAndFrequency);
+		visit(documentGraphNode, documentNode, template.getNode(document.getId()), termAndFrequency, null);
 		computeCValue(termAndFrequency);
 	}
 	
@@ -101,7 +101,16 @@ public class FinancialXMLParser {
 		}
 	}
 
-	private void visit(org.neo4j.graphdb.Node graphNode, Node xmlNode, org.neo4j.graphdb.Node document, Map<String, Integer> documentTermAndFrequency) {
+	/**
+	 * 
+	 * 
+	 * @param graphNode
+	 * @param xmlNode
+	 * @param document
+	 * @param documentTermAndFrequency
+	 * @param sectionId -- corresponds to either the id of a <P> tag or a <Sect> tag
+	 */
+	private void visit(org.neo4j.graphdb.Node graphNode, Node xmlNode, org.neo4j.graphdb.Node document, Map<String, Integer> documentTermAndFrequency, Long sectionId) {
 		NodeList children = xmlNode.getChildNodes();
 		org.neo4j.graphdb.Node previousGraphChildNode = null;
 		
@@ -123,7 +132,18 @@ public class FinancialXMLParser {
 			}
 
 			previousGraphChildNode = graphChildNode;
-			visit(graphChildNode, childNode, document, documentTermAndFrequency);
+
+			// Root node does not have a parent
+			if(xmlNode.getParentNode() != null) {
+				// Are we in a <P> within a <Sect>, if not then sectionId has to be null and we will see a P
+				if(isSection(xmlNode)) {
+					sectionId = graphNode.getId();
+				} else if(sectionId == null && NodeName.PARAGRAPH.getTextName().equals(xmlNode.getNodeName())) {
+					sectionId = graphNode.getId();
+				}
+			}
+			
+			visit(graphChildNode, childNode, document, documentTermAndFrequency, sectionId);
 		} 
 		
 		// Parent Node is null for the top level of the document
@@ -133,7 +153,7 @@ public class FinancialXMLParser {
 			String rawSentence = hashText.getNodeValue();
 			// IMPORTANT, this isn't a hard and fast rule, more like a hack for now
 			if(!(rawSentence.startsWith("% Change") && rawSentence.length() > 30 )) {
-				List<Sentence> sentences = stanfordParser.parseAndLoad(hashText.getNodeValue(), this.sentenceNumber, documentTermAndFrequency);
+				List<Sentence> sentences = stanfordParser.parseAndLoad(hashText.getNodeValue(), this.sentenceNumber, documentTermAndFrequency, sectionId);
 				for(Sentence sentence : sentences) {
 					org.neo4j.graphdb.Node sentenceNode = graphDatabaseUtils.getNode(sentence);
 					graphDatabaseUtils.createRelationship(graphNode, sentenceNode, ApplicationRelationshipType.HAS_CHILD);
@@ -142,6 +162,10 @@ public class FinancialXMLParser {
 				}
 			}
 		}
+	}
+
+	private boolean isSection(Node xmlNode) {
+		return NodeName.SECTION.getTextName().equals(xmlNode.getNodeName());
 	}
 
 	/**

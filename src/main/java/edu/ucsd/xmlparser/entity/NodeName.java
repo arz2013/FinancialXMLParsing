@@ -1,7 +1,7 @@
 package edu.ucsd.xmlparser.entity;
 
 public enum NodeName {
-	PARAGRAPH("P"), HASH_TEXT("#text");
+	SECTION("Sect"), PARAGRAPH("P"), HASH_TEXT("#text");
 	
 	String textName;
 	

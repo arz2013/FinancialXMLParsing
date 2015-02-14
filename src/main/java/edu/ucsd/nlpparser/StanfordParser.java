@@ -43,6 +43,7 @@ import edu.stanford.nlp.trees.TreebankLanguagePack;
 import edu.stanford.nlp.trees.TypedDependency;
 import edu.stanford.nlp.trees.TreeCoreAnnotations.TreeAnnotation;
 import edu.stanford.nlp.util.CoreMap;
+import edu.ucsd.cvalue.CValueRawFrequency;
 import edu.ucsd.xmlparser.dao.SentenceDao;
 import edu.ucsd.xmlparser.entity.ApplicationRelationshipType;
 import edu.ucsd.xmlparser.entity.Sentence;
@@ -96,7 +97,7 @@ public class StanfordParser {
 	 * @return
 	 */
 	@Transactional(propagation=Propagation.REQUIRES_NEW)
-	public List<Sentence> parseAndLoad(String text, int noSentence, Map<String, Integer> termAndFrequency, Long sectionId, Map<String, Integer> sectionTermAndFrequency) {
+	public List<Sentence> parseAndLoad(String text, int noSentence, Map<String, CValueRawFrequency> termAndFrequency, Long sectionId, Map<String, CValueRawFrequency> sectionTermAndFrequency) {
 		if(text == null) {
 			throw new IllegalArgumentException("Sentence can not be null");
 		}
@@ -137,23 +138,6 @@ public class StanfordParser {
 
 			newSentence.addWord(root);
 			
-			List<SequenceMatchResult<CoreMap>> results = multiPatternMatcher.findNonOverlapping(sentence.get(TokensAnnotation.class));
-			for(SequenceMatchResult<CoreMap> res : results) {
-				Integer frequency = termAndFrequency.get(res.group());					
-				if(frequency == null) {
-					termAndFrequency.put(res.group(), 1);
-				} else {
-					termAndFrequency.put(res.group(), frequency++);
-				}	
-				
-				frequency = sectionTermAndFrequency.get(res.group());					
-				if(frequency == null) {
-					sectionTermAndFrequency.put(res.group(), 1);
-				} else {
-					sectionTermAndFrequency.put(res.group(), frequency++);
-				}	
-			}
-
 			for (CoreLabel token: sentence.get(TokensAnnotation.class)) {
 				// this is the text of the token
 				String word = token.get(TextAnnotation.class);
@@ -181,6 +165,26 @@ public class StanfordParser {
 
 			sentenceDao.save(newSentence);
 
+			List<SequenceMatchResult<CoreMap>> results = multiPatternMatcher.findNonOverlapping(sentence.get(TokensAnnotation.class));
+			for(SequenceMatchResult<CoreMap> res : results) {
+				CValueRawFrequency frequency = termAndFrequency.get(res.group());					
+				if(frequency == null) {
+					frequency = new CValueRawFrequency();
+					termAndFrequency.put(res.group(), frequency);
+				} 
+				frequency.addSentenceId(newSentence.getId());
+				frequency.incrementFrequency();
+				
+				frequency = sectionTermAndFrequency.get(res.group());					
+				if(frequency == null) {
+					frequency = new CValueRawFrequency();
+					sectionTermAndFrequency.put(res.group(), frequency);
+				} 
+				frequency.addSentenceId(newSentence.getId());
+				frequency.incrementFrequency();
+			}
+
+			
 			Node sentenceNode = template.getNode(newSentence.getId());
 			template.createRelationshipBetween(sentenceNode, template.getNode(root.getId()), 
 					ApplicationRelationshipType.FIRST_WORD.name(), new HashMap<String, Object>());

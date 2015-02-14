@@ -22,18 +22,21 @@ public class CValueNode {
 
 	private String referenceType;
 	
-	private Set<Long> referenceIds = new HashSet<Long>();
+	private Set<Long> sectionIds = new HashSet<Long>();
+	private Set<Long> sentenceIds = new HashSet<Long>();
 	
 	@SuppressWarnings("unused")
 	private CValueNode() {
 	}
 	
-	public CValueNode(String text, Integer frequency, Double cValue, ReferenceType type, Set<Long> referenceIds) {
+	public CValueNode(String text, Integer frequency, Double cValue, ReferenceType type, Set<Long> sectionIds,
+			Set<Long> sentenceIds) {
 		this.text = text;
 		this.frequency = frequency;
 		this.cValue = cValue;
 		this.referenceType = type.getFriendlyString();
-		this.referenceIds.addAll(referenceIds);
+		this.sectionIds.addAll(sectionIds);
+		this.sentenceIds.addAll(sentenceIds);
 	}
 
 	public Long getId() {
@@ -54,5 +57,13 @@ public class CValueNode {
 
 	public String getReferenceType() {
 		return referenceType;
+	}
+
+	public Set<Long> getSectionIds() {
+		return sectionIds;
+	}
+
+	public Set<Long> getSentenceIds() {
+		return sentenceIds;
 	}
 }

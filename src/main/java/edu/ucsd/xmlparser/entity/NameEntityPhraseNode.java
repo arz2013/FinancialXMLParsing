@@ -19,6 +19,7 @@ public class NameEntityPhraseNode {
 	
 	private Long sentenceId;
 	
+	@SuppressWarnings("unused")
 	private NameEntityPhraseNode() {
 	}
 	

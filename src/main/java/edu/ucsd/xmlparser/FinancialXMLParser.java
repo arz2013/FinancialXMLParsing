@@ -66,7 +66,7 @@ public class FinancialXMLParser {
 		Document document = new Document(file.getName(), 2012, 1);
 		template.save(document);
 		Map<String, Integer> termAndFrequency = new HashMap<String, Integer>();
-		visit(documentGraphNode, documentNode, template.getNode(document.getId()), termAndFrequency, null);
+		visit(documentGraphNode, documentNode, template.getNode(document.getId()), termAndFrequency, null, null);
 		computeCValue(termAndFrequency);
 	}
 	
@@ -110,9 +110,11 @@ public class FinancialXMLParser {
 	 * @param documentTermAndFrequency
 	 * @param sectionId -- corresponds to either the id of a <P> tag or a <Sect> tag
 	 */
-	private void visit(org.neo4j.graphdb.Node graphNode, Node xmlNode, org.neo4j.graphdb.Node document, Map<String, Integer> documentTermAndFrequency, Long sectionId) {
+	private void visit(org.neo4j.graphdb.Node graphNode, Node xmlNode, org.neo4j.graphdb.Node document, Map<String, Integer> documentTermAndFrequency, Long sectionId, Map<String, Integer> sectionTermAndFrequency) {
 		NodeList children = xmlNode.getChildNodes();
 		org.neo4j.graphdb.Node previousGraphChildNode = null;
+		boolean isSection = false;
+		boolean isIndependentParagraphSection = false;
 		
 		for(int i = 0; i < children.getLength(); i++) {			
 			Node childNode = children.item(i);
@@ -138,12 +140,16 @@ public class FinancialXMLParser {
 				// Are we in a <P> within a <Sect>, if not then sectionId has to be null and we will see a P
 				if(isSection(xmlNode)) {
 					sectionId = graphNode.getId();
+					isSection = true;
+					sectionTermAndFrequency = new HashMap<String, Integer>();
 				} else if(sectionId == null && NodeName.PARAGRAPH.getTextName().equals(xmlNode.getNodeName())) {
 					sectionId = graphNode.getId();
+					isIndependentParagraphSection = true;
+					sectionTermAndFrequency = new HashMap<String, Integer>();
 				}
 			}
 			
-			visit(graphChildNode, childNode, document, documentTermAndFrequency, sectionId);
+			visit(graphChildNode, childNode, document, documentTermAndFrequency, sectionId, sectionTermAndFrequency);
 		} 
 		
 		// Parent Node is null for the top level of the document
@@ -153,7 +159,7 @@ public class FinancialXMLParser {
 			String rawSentence = hashText.getNodeValue();
 			// IMPORTANT, this isn't a hard and fast rule, more like a hack for now
 			if(!(rawSentence.startsWith("% Change") && rawSentence.length() > 30 )) {
-				List<Sentence> sentences = stanfordParser.parseAndLoad(hashText.getNodeValue(), this.sentenceNumber, documentTermAndFrequency, sectionId);
+				List<Sentence> sentences = stanfordParser.parseAndLoad(hashText.getNodeValue(), this.sentenceNumber, documentTermAndFrequency, sectionId, sectionTermAndFrequency);
 				for(Sentence sentence : sentences) {
 					org.neo4j.graphdb.Node sentenceNode = graphDatabaseUtils.getNode(sentence);
 					graphDatabaseUtils.createRelationship(graphNode, sentenceNode, ApplicationRelationshipType.HAS_CHILD);

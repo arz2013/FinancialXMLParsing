@@ -92,10 +92,11 @@ public class StanfordParser {
 	 * @param text
 	 * @param noSentence
 	 * @param sectionId 
+	 * @param sectionTermAndFrequency 
 	 * @return
 	 */
 	@Transactional(propagation=Propagation.REQUIRES_NEW)
-	public List<Sentence> parseAndLoad(String text, int noSentence, Map<String, Integer> termAndFrequency, Long sectionId) {
+	public List<Sentence> parseAndLoad(String text, int noSentence, Map<String, Integer> termAndFrequency, Long sectionId, Map<String, Integer> sectionTermAndFrequency) {
 		if(text == null) {
 			throw new IllegalArgumentException("Sentence can not be null");
 		}
@@ -143,6 +144,13 @@ public class StanfordParser {
 					termAndFrequency.put(res.group(), 1);
 				} else {
 					termAndFrequency.put(res.group(), frequency++);
+				}	
+				
+				frequency = sectionTermAndFrequency.get(res.group());					
+				if(frequency == null) {
+					sectionTermAndFrequency.put(res.group(), 1);
+				} else {
+					sectionTermAndFrequency.put(res.group(), frequency++);
 				}	
 			}
 

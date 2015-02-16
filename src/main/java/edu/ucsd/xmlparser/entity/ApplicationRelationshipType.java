@@ -12,5 +12,7 @@ public enum ApplicationRelationshipType implements RelationshipType {
 	NEXT, 
 	FIRST_WORD, 
 	NEXT_WORD, 
-	REFERS_TO;
+	REFERS_TO, 
+	// Constructs the relationship between Document and #document
+	RELATED_DOCUMENT;
 }

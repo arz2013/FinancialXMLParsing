@@ -65,6 +65,8 @@ public class FinancialXMLParser {
 		org.neo4j.graphdb.Node documentGraphNode = graphDatabaseUtils.toDocumentGraphNode(documentNode);
 		Document document = new Document(file.getName(), 2012, 1);
 		template.save(document);
+		// Create relationship between document and #document
+		graphDatabaseUtils.createRelationship(template.getNode(document.getId()), documentGraphNode, ApplicationRelationshipType.RELATED_DOCUMENT);
 		Map<String, CValueRawFrequency> termAndFrequency = new HashMap<String, CValueRawFrequency>();
 		visit(documentGraphNode, documentNode, template.getNode(document.getId()), termAndFrequency, null, null);
 		computeCValueAndPersist(termAndFrequency, ReferenceType.DOCUMENT, document);
@@ -191,6 +193,7 @@ public class FinancialXMLParser {
 			Map<String, CValueRawFrequency> documentTermAndFrequency,
 			Map<String, CValueRawFrequency> sectionTermAndFrequency) {
 		for(String sectionTerm : sectionTermAndFrequency.keySet()) {
+			sectionTermAndFrequency.get(sectionTerm).addSectionId(sectionId);
 			documentTermAndFrequency.get(sectionTerm).addSectionId(sectionId);
 		}
 	}

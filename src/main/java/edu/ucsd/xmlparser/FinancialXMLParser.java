@@ -25,7 +25,8 @@ import edu.ucsd.cvalue.CValueData;
 import edu.ucsd.cvalue.CValueRawFrequency;
 import edu.ucsd.nlpparser.StanfordParser;
 import edu.ucsd.xmlparser.entity.ApplicationRelationshipType;
-import edu.ucsd.xmlparser.entity.CValueNode;
+import edu.ucsd.xmlparser.entity.CValueDocumentNode;
+import edu.ucsd.xmlparser.entity.CValueSectionNode;
 import edu.ucsd.xmlparser.entity.Document;
 import edu.ucsd.xmlparser.entity.NodeName;
 import edu.ucsd.xmlparser.entity.ReferenceType;
@@ -66,10 +67,10 @@ public class FinancialXMLParser {
 		template.save(document);
 		Map<String, CValueRawFrequency> termAndFrequency = new HashMap<String, CValueRawFrequency>();
 		visit(documentGraphNode, documentNode, template.getNode(document.getId()), termAndFrequency, null, null);
-		computeCValueAndPersist(termAndFrequency, ReferenceType.DOCUMENT);
+		computeCValueAndPersist(termAndFrequency, ReferenceType.DOCUMENT, document);
 	}
 	
-	private void computeCValueAndPersist(Map<String, CValueRawFrequency> termAndFrequency, ReferenceType refType) {
+	private void computeCValueAndPersist(Map<String, CValueRawFrequency> termAndFrequency, ReferenceType refType, Document document) {
 		System.out.println("Number of terms raw: " + termAndFrequency.size());
 		if(termAndFrequency.size() == 0) {
 			return;
@@ -99,8 +100,13 @@ public class FinancialXMLParser {
 		
 		for(String term : termAndFrequency.keySet()) {
 			CValueRawFrequency frequency = termAndFrequency.get(term);
-			CValueNode node = new CValueNode(term, frequency.getFrequency(), cValueMap.get(term).getCValue(), refType, frequency.getSectionIds(), frequency.getSectionIds());
-			template.save(node);
+			if(ReferenceType.SECTION.equals(refType)) {
+				CValueSectionNode node = new CValueSectionNode(term, frequency.getFrequency(), cValueMap.get(term).getCValue(), frequency.getSectionIds().iterator().next(), frequency.getSentenceIds());
+				template.save(node);
+			} else if(ReferenceType.DOCUMENT.equals(refType)) {
+				CValueDocumentNode node = new CValueDocumentNode(term, frequency.getFrequency(), cValueMap.get(term).getCValue(), document.getId(), frequency.getSectionIds());
+				template.save(node);
+			}
 		}
 	}
 
@@ -177,7 +183,7 @@ public class FinancialXMLParser {
 		// Need to update the document ones with section id of this section based on intersection
 		if(isSection || isIndependentParagraphSection) {
 			updateDocumentCValueRawFrequency(sectionId, documentTermAndFrequency, sectionTermAndFrequency);
-			this.computeCValueAndPersist(sectionTermAndFrequency, ReferenceType.SECTION);
+			this.computeCValueAndPersist(sectionTermAndFrequency, ReferenceType.SECTION, null);
 		} 
 	}
 

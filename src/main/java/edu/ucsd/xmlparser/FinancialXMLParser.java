@@ -44,6 +44,7 @@ public class FinancialXMLParser {
 	private StanfordParser stanfordParser;
 	
 	private int sentenceNumber = 0;
+	private int documentNumber = 0;
 	
 	private static Logger logger = LoggerFactory.getLogger(FinancialXMLParser.class);
 	
@@ -58,18 +59,23 @@ public class FinancialXMLParser {
 	 * @throws Exception
 	 */
 	@Transactional
-	public void parseAndLoad(File file) throws Exception {
+	public void parseAndLoad(File file, int year) throws Exception {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		DocumentBuilder db = dbf.newDocumentBuilder(); 
 		Node documentNode = db.parse(file);
 		org.neo4j.graphdb.Node documentGraphNode = graphDatabaseUtils.toDocumentGraphNode(documentNode);
-		Document document = new Document(file.getName(), 2012, 1);
+		Document document = new Document(file.getName(), year, documentNumber);
 		template.save(document);
 		// Create relationship between document and #document
 		graphDatabaseUtils.createRelationship(template.getNode(document.getId()), documentGraphNode, ApplicationRelationshipType.RELATED_DOCUMENT);
 		Map<String, CValueRawFrequency> termAndFrequency = new HashMap<String, CValueRawFrequency>();
 		visit(documentGraphNode, documentNode, template.getNode(document.getId()), termAndFrequency, null, null);
 		computeCValueAndPersist(termAndFrequency, ReferenceType.DOCUMENT, document);
+		documentNumber++; // Increment for the next document
+	}
+	
+	public void reset() {
+		this.sentenceNumber = 0;
 	}
 	
 	private void computeCValueAndPersist(Map<String, CValueRawFrequency> termAndFrequency, ReferenceType refType, Document document) {

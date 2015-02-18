@@ -167,18 +167,19 @@ public class StanfordParser {
 
 			List<SequenceMatchResult<CoreMap>> results = multiPatternMatcher.findNonOverlapping(sentence.get(TokensAnnotation.class));
 			for(SequenceMatchResult<CoreMap> res : results) {
-				CValueRawFrequency frequency = termAndFrequency.get(res.group());					
+				String term = res.group().toLowerCase();
+				CValueRawFrequency frequency = termAndFrequency.get(term);					
 				if(frequency == null) {
 					frequency = new CValueRawFrequency();
-					termAndFrequency.put(res.group(), frequency);
+					termAndFrequency.put(term, frequency);
 				} 
 				frequency.addSentenceId(newSentence.getId());
 				frequency.incrementFrequency();
 				
-				frequency = sectionTermAndFrequency.get(res.group());					
+				frequency = sectionTermAndFrequency.get(term);					
 				if(frequency == null) {
 					frequency = new CValueRawFrequency();
-					sectionTermAndFrequency.put(res.group(), frequency);
+					sectionTermAndFrequency.put(term, frequency);
 				} 
 				frequency.addSentenceId(newSentence.getId());
 				frequency.incrementFrequency();

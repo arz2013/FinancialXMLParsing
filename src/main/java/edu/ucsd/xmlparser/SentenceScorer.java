@@ -1,5 +1,6 @@
 package edu.ucsd.xmlparser;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,9 +50,12 @@ public class SentenceScorer {
 			}
 		}
 		
+		// Compute the max value and then scale by that value to get a score between 0 and 1
+		Double maxValue = Collections.max(sentenceIdToCombinedValue.values());
+		
 		for(Long sentenceId : sentenceIdToCombinedValue.keySet()) {
 			Node sentenceNode = template.getNode(sentenceId);
-			sentenceNode.setProperty("score", sentenceIdToCombinedValue.get(sentenceId));
+			sentenceNode.setProperty("score", sentenceIdToCombinedValue.get(sentenceId)/maxValue);
 		}
 	}
 

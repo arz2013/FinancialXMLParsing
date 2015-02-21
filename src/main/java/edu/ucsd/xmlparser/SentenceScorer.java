@@ -7,14 +7,23 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.neo4j.graphdb.Node;
+import org.springframework.data.neo4j.support.Neo4jTemplate;
+import org.springframework.transaction.annotation.Transactional;
+
 import edu.ucsd.xmlparser.entity.CValueCollectionNode;
 import edu.ucsd.xmlparser.entity.CValueSectionNode;
+import edu.ucsd.xmlparser.entity.NameEntityPhraseNode;
 import edu.ucsd.xmlparser.repository.CValueRepository;
 
 public class SentenceScorer {
 	@Inject
 	private CValueRepository cValueRepository;
 	
+	@Inject
+	private Neo4jTemplate template;
+	
+	@Transactional
 	public void scoreSentence() {
 		List<CValueCollectionNode> nodes = cValueRepository.getAllCValueCollectionNodes();
 		Map<String, Double> textToCValue = convertToMap(nodes);
@@ -31,6 +40,19 @@ public class SentenceScorer {
 			}
 		}
 		
+		// Add all Named Entities
+		List<NameEntityPhraseNode> neNodes = cValueRepository.getAllNameEntityPhraseNodes();
+		for(NameEntityPhraseNode neNode : neNodes) {
+			Double value = sentenceIdToCombinedValue.putIfAbsent(neNode.getSentenceId(), 1.0);
+			if(value != null) {
+				sentenceIdToCombinedValue.put(neNode.getSentenceId(), value + 1.0);
+			}
+		}
+		
+		for(Long sentenceId : sentenceIdToCombinedValue.keySet()) {
+			Node sentenceNode = template.getNode(sentenceId);
+			sentenceNode.setProperty("score", sentenceIdToCombinedValue.get(sentenceId));
+		}
 	}
 
 	private Map<String, Set<Long>> convertToSentenceIdMapping(

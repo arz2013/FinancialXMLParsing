@@ -36,4 +36,7 @@ public interface SentenceRepository extends GraphRepository<Sentence> {
 
 	@Query("match (s:_Sentence)-[h:HAS_WORD]->(w:_Word) where s.sNum = {0} and w.position = {1} return w;")
 	public Node getWord(int sentenceNumber, int startIndex);
+
+	@Query("match (s:_Sentence) where id(s) = {0} return s")
+	public Sentence getSentenceById(Long sentenceId);
 }

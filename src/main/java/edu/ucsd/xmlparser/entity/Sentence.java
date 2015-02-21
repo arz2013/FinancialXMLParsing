@@ -30,6 +30,8 @@ public class Sentence {
 	@Fetch
 	@RelatedToVia(type="HAS_WORD", direction=Direction.OUTGOING)
 	private Set<SentenceToWord> words = new HashSet<SentenceToWord>();
+
+	private Double score;
 	
 	private Sentence() {	
 	}
@@ -112,5 +114,13 @@ public class Sentence {
 
 	public int countNumberOfWords() {
 		return this.words.size();
+	}
+
+	public void setScore(Double score) {
+		this.score = score;
+	}
+	
+	public Double getScore() {
+		return this.score;
 	}
 }

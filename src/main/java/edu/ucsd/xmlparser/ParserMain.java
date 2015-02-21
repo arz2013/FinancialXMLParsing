@@ -21,9 +21,12 @@ public class ParserMain {
 		}
 		FinancialXMLParser parser = FinancialXMLParser.class.cast(context.getBean("financialXMLParser"));
 		for(File file : files) {
+			System.out.println("Now processing file: " + file);
 			parser.parseAndLoad(file, 2013);
+			parser.reset();
 		}
 
+		System.out.println("Calculating Collection Level CValues");
 		CValueDocumentCalculator cValueDocumentCalculator = CValueDocumentCalculator.class.cast(context.getBean("cValueDocumentCalculator"));
 		cValueDocumentCalculator.computeCollectionLevelCValue();
 	}

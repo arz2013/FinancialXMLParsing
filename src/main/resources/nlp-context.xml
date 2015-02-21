@@ -32,6 +32,7 @@
     <context:component-scan base-package="edu.ucsd.cvalue"/>
  
     <bean name="financialXMLParser" class="edu.ucsd.xmlparser.FinancialXMLParser" lazy-init="true" />
+    <bean name="sentenceScorer" class="edu.ucsd.xmlparser.SentenceScorer" />
     <bean name="stanfordParser" class="edu.ucsd.nlpparser.StanfordParser" init-method="initiate" lazy-init="true" />
  	<bean name="cValueDocumentCalculator" class="edu.ucsd.cvalue.CValueDocumentCalculator"/>
  	

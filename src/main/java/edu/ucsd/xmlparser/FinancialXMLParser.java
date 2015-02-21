@@ -45,6 +45,8 @@ public class FinancialXMLParser {
 	
 	private int sentenceNumber = 0;
 	private int documentNumber = 0;
+
+	private int lengthOfDocument;
 	
 	private static Logger logger = LoggerFactory.getLogger(FinancialXMLParser.class);
 	
@@ -72,10 +74,12 @@ public class FinancialXMLParser {
 		visit(documentGraphNode, documentNode, template.getNode(document.getId()), termAndFrequency, null, null);
 		computeCValueAndPersist(termAndFrequency, ReferenceType.DOCUMENT, document);
 		documentNumber++; // Increment for the next document
+		System.out.println("Document Length: " + this.lengthOfDocument);
 	}
 	
 	public void reset() {
 		this.sentenceNumber = 0;
+		this.lengthOfDocument = 0;
 	}
 	
 	private void computeCValueAndPersist(Map<String, CValueRawFrequency> termAndFrequency, ReferenceType refType, Document document) {
@@ -180,6 +184,7 @@ public class FinancialXMLParser {
 			if(!(rawSentence.startsWith("% Change") && rawSentence.length() > 30 )) {
 				List<Sentence> sentences = stanfordParser.parseAndLoad(hashText.getNodeValue(), this.sentenceNumber, documentTermAndFrequency, sectionId, sectionTermAndFrequency);
 				for(Sentence sentence : sentences) {
+					this.lengthOfDocument += sentence.getText().length();
 					org.neo4j.graphdb.Node sentenceNode = graphDatabaseUtils.getNode(sentence);
 					graphDatabaseUtils.createRelationship(graphNode, sentenceNode, ApplicationRelationshipType.HAS_CHILD);
 					graphDatabaseUtils.createRelationship(document, sentenceNode, ApplicationRelationshipType.HAS_SENTENCE);

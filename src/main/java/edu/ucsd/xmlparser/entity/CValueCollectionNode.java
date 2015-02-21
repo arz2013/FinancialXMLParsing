@@ -36,7 +36,7 @@ public class CValueCollectionNode {
 		return text;
 	}
 
-	public Double getcValue() {
+	public Double getCValue() {
 		return cValue;
 	}
 

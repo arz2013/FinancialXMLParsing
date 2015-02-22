@@ -9,6 +9,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
+import edu.stanford.nlp.ling.CoreAnnotations.LemmaAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.CoreAnnotations.NamedEntityTagAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.PartOfSpeechAnnotation;
@@ -26,7 +27,7 @@ public class QuestionAnsweringModule implements ApplicationContextAware {
 	
 	public QuestionAnsweringModule() {
 		Properties props = new Properties();
-		props.put("annotators", "tokenize, pos, ner"); 
+		props.put("annotators", "tokenize, ssplit, pos, lemma, ner"); 
 		pipeline = new StanfordCoreNLP(props);
 	}
 	
@@ -50,7 +51,9 @@ public class QuestionAnsweringModule implements ApplicationContextAware {
 				String pos = token.get(PartOfSpeechAnnotation.class);
 				// this is the NER label of the token
 				String ne = token.get(NamedEntityTagAnnotation.class);
-				System.out.println(word + ", " + pos + ", " + ne);
+				// this is the LEMMA
+				String lemma = token.get(LemmaAnnotation.class);
+				System.out.println(word + ", " + pos + ", " + ne + ", " + lemma);
 			}
 		}
 	}

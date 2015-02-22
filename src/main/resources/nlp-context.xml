@@ -35,7 +35,7 @@
     <bean name="sentenceScorer" class="edu.ucsd.xmlparser.SentenceScorer" />
     <bean name="stanfordParser" class="edu.ucsd.nlpparser.StanfordParser" init-method="initiate" lazy-init="true" />
  	<bean name="cValueDocumentCalculator" class="edu.ucsd.cvalue.CValueDocumentCalculator"/>
- 	
+ 	<bean name="questionAnsweringModule" class="edu.ucsd.questionanswering.QuestionAnsweringModule"/>
     <bean name="graphDao" class="edu.ucsd.xmlparser.dao.GraphDao"/>
     <bean name="graphDatabaseUtils" class="edu.ucsd.xmlparser.util.GraphDatabaseUtils"/>
     

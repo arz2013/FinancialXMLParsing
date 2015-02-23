@@ -16,4 +16,8 @@ public class ListAnswer implements Answer {
 		return sb.toString();
 	}
 
+	@Override
+	public String toString() {
+		return "ListAnswer [multipleStrings=" + multipleStrings + "]";
+	}
 }

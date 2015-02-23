@@ -199,7 +199,7 @@ public class StanfordParser {
 			TreebankLanguagePack tlp = new PennTreebankLanguagePack();
 			GrammaticalStructureFactory gsf = tlp.grammaticalStructureFactory();
 			GrammaticalStructure gs = gsf.newGrammaticalStructure(tree);
-			Collection<TypedDependency> tds = gs.typedDependencies();
+			Collection<TypedDependency> tds = gs.typedDependenciesCollapsed();
 			for(TypedDependency td : tds) {
 				// Check for existence of words
 				Word startWord = getWord(td.gov(), seenWords);

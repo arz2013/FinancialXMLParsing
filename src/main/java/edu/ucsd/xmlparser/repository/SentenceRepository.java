@@ -2,6 +2,7 @@ package edu.ucsd.xmlparser.repository;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.neo4j.graphdb.Node;
 import org.springframework.data.neo4j.annotation.Query;
@@ -39,4 +40,7 @@ public interface SentenceRepository extends GraphRepository<Sentence> {
 
 	@Query("match (s:_Sentence) where id(s) = {0} return s")
 	public Sentence getSentenceById(Long sentenceId);
+
+	@Query("match (d:Document)-[:HAS_SENTENCE]->(s:Sentence)-[:HAS_WORD]->(w:Word) where id(d) = {0} and w.text in {1} return w")
+	public List<Word> findWords(Long documentId, Set<String> verbAndNounEquivalents);
 }

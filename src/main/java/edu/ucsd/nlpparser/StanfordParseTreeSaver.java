@@ -71,23 +71,23 @@ public class StanfordParseTreeSaver {
 		this.fullTextAndNeTagPhrase = indexManager.forNodes("phrase-fulltext", MapUtil.stringMap( IndexManager.PROVIDER, "lucene", "type", "fulltext"));
 	}
 	
-	public void performDepthFirstTraversal(Tree tree, Long sectionId) {
+	public void performDepthFirstTraversal(Tree tree, Long sectionId, Long documentId) {
 		if(tree == null) {
 			throw new IllegalArgumentException("Argument Tree can not be null");
 		}
 		
 		innerDepthFirstTraversal(tree, null);
-		createPhraseIndex(sectionId);
+		createPhraseIndex(sectionId, documentId);
 	}
 	
-	private void createPhraseIndex(Long sectionId) {
+	private void createPhraseIndex(Long sectionId, Long documentId) {
 		for(Node parseNode : this.parentToWordsPhrase.keySet()) {
 			List<Word> children = this.parentToWordsPhrase.get(parseNode);
-			constructPhrase(parseNode, children, sectionId);
+			constructPhrase(parseNode, children, sectionId, documentId);
 		}
 	}
 
-	private void constructPhrase(Node parseNode, List<Word> children, Long sectionId) {
+	private void constructPhrase(Node parseNode, List<Word> children, Long sectionId, Long documentId) {
 		String phrase = null;
 		String neTag = null;
 		
@@ -117,7 +117,7 @@ public class StanfordParseTreeSaver {
 		
 		if(containsNeededNeTag) {
 			phrase = sb.toString().trim();
-			NameEntityPhraseNode phraseNode = new NameEntityPhraseNode(phrase, neTag, sectionId, sentence.getId());
+			NameEntityPhraseNode phraseNode = new NameEntityPhraseNode(phrase, neTag, documentId, sectionId, sentence.getId());
 			template.save(phraseNode);
 			/*
 			this.fullTextAndNeTagPhrase.add(parseNode, "phrase", phrase);

@@ -15,6 +15,8 @@ public class NameEntityPhraseNode {
 	
 	private String neType;
 	
+	private Long documentId; 
+	
 	private Long sectionId;
 	
 	private Long sentenceId;
@@ -23,9 +25,10 @@ public class NameEntityPhraseNode {
 	private NameEntityPhraseNode() {
 	}
 	
-	public NameEntityPhraseNode(String phrase, String neType, Long sectionId, Long sentenceId) {
+	public NameEntityPhraseNode(String phrase, String neType, Long documentId, Long sectionId, Long sentenceId) {
 		this.phrase = phrase;
 		this.neType = neType;
+		this.documentId = documentId;
 		this.sectionId = sectionId;
 		this.sentenceId = sentenceId;
 	}
@@ -40,6 +43,10 @@ public class NameEntityPhraseNode {
 
 	public String getNeType() {
 		return neType;
+	}
+	
+	public Long getDocumentId() {
+		return documentId;
 	}
 
 	public Long getSectionId() {

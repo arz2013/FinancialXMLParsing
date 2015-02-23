@@ -182,7 +182,7 @@ public class FinancialXMLParser {
 			String rawSentence = hashText.getNodeValue();
 			// IMPORTANT, this isn't a hard and fast rule, more like a hack for now
 			if(!(rawSentence.startsWith("% Change") && rawSentence.length() > 30 )) {
-				List<Sentence> sentences = stanfordParser.parseAndLoad(hashText.getNodeValue(), this.sentenceNumber, documentTermAndFrequency, sectionId, sectionTermAndFrequency);
+				List<Sentence> sentences = stanfordParser.parseAndLoad(hashText.getNodeValue(), this.sentenceNumber, documentTermAndFrequency, document.getId(), sectionId, sectionTermAndFrequency);
 				for(Sentence sentence : sentences) {
 					this.lengthOfDocument += sentence.getText().length();
 					org.neo4j.graphdb.Node sentenceNode = graphDatabaseUtils.getNode(sentence);

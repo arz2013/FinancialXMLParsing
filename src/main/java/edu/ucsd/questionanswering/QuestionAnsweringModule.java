@@ -1,7 +1,9 @@
 package edu.ucsd.questionanswering;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
@@ -21,9 +23,16 @@ import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.util.CoreMap;
 
 public class QuestionAnsweringModule implements ApplicationContextAware {
+	private static Map<String, String> questionHandlers = new HashMap<String, String>();
+	
+	static {
+		questionHandlers.put("which", "whichQuestionHandler");
+	}
+	
 	private ApplicationContext applicationContext;
 	
 	private StanfordCoreNLP pipeline;
+
 	
 	public QuestionAnsweringModule() {
 		Properties props = new Properties();
@@ -31,18 +40,34 @@ public class QuestionAnsweringModule implements ApplicationContextAware {
 		pipeline = new StanfordCoreNLP(props);
 	}
 	
-	public void answer(String question) {
+	public Answer answer(String question) {
+		if(question == null || question.length() == 0) {
+			throw new IllegalArgumentException("A question can not be null or an empty string");
+		}
+		
 		List<String> questionTokens = new ArrayList<String>();
 		StringTokenizer tokenizer = new StringTokenizer(question);
 		while(tokenizer.hasMoreTokens()) {
 			questionTokens.add(tokenizer.nextToken());
 		}
 		
+		// Find Question Type
+		QuestionHandler questionHandler = (QuestionHandler)this.applicationContext.getBean(questionHandlers.get(questionTokens.get(0).toLowerCase()));
+		if(questionHandler == null) {
+			throw new IllegalArgumentException("Question type " + questionTokens.get(0) + " is unrecognized.");
+		}
+		
 		Annotation questionDocument = new Annotation(question);
 		pipeline.annotate(questionDocument);
 		
 		List<CoreMap> sentences = questionDocument.get(SentencesAnnotation.class);
-
+		
+		if(sentences.size() != 1) {
+			throw new IllegalArgumentException("You can only specify one question.");
+		}
+		
+		List<ParsedWord> parsedQuestion = new ArrayList<ParsedWord>();
+		
 		for(CoreMap sentence: sentences) {
 			for (CoreLabel token: sentence.get(TokensAnnotation.class)) {
 				// this is the text of the token
@@ -53,9 +78,11 @@ public class QuestionAnsweringModule implements ApplicationContextAware {
 				String ne = token.get(NamedEntityTagAnnotation.class);
 				// this is the LEMMA
 				String lemma = token.get(LemmaAnnotation.class);
-				System.out.println(word + ", " + pos + ", " + ne + ", " + lemma);
+				parsedQuestion.add(new ParsedWord(word, pos, ne, lemma));
 			}
 		}
+		
+		return questionHandler.answerQuestion(parsedQuestion);
 	}
 
 	@Override

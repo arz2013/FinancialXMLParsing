@@ -24,7 +24,9 @@
   
   	<context:component-scan base-package="edu.ucsd.query.function"/> 
     <context:component-scan base-package="edu.ucsd.query.function.dao"/>
-     
+
+	<context:component-scan base-package="edu.ucsd.questionanswering"/>
+	     
     <context:component-scan base-package="edu.ucsd.xmlparser"/>
     <context:component-scan base-package="edu.ucsd.xmlparser.dao"/>
     <context:component-scan base-package="edu.ucsd.xmlparser.util"/>
@@ -48,6 +50,8 @@
  	
  	<bean name="sentenceContains" class="edu.ucsd.query.function.SentenceContains"/>
  	<bean name="documentContains" class="edu.ucsd.query.function.DocumentContains"/>
+
+	<bean name="whichQuestionHandler" class="edu.ucsd.questionanswering.WhichQuestionHandler"/>
  	
     <util:map id="config">
 		<entry key="enable_remote_shell" value="true"/>

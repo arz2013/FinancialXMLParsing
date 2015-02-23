@@ -10,6 +10,11 @@ public class QuestionAnsweringMain {
 		ApplicationContext ctx = SystemApplicationContext.getApplicationContext();
 		QuestionAnsweringModule qaModule = QuestionAnsweringModule.class.cast(ctx.getBean("questionAnsweringModule"));
 		qaModule.answer("Which organizations did Disney acquire?");
+		/**
+		qaModule.answer("Which organizations did Walt Disney acquire?");
+		qaModule.answer("What acquisitions did Chevron make?"); // Unable to answer this one
+		qaModule.answer("When did Disney acquire Marvel?");
+		*/
 	}
 
 }

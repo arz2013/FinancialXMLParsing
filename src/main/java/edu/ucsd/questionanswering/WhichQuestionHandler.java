@@ -1,6 +1,6 @@
 package edu.ucsd.questionanswering;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -9,13 +9,11 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import org.neo4j.graphdb.Direction;
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Relationship;
-import org.springframework.data.neo4j.support.Neo4jTemplate;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.transaction.annotation.Transactional;
 
-import edu.ucsd.xmlparser.entity.ApplicationRelationshipType;
 import edu.ucsd.xmlparser.entity.NeTags;
 import edu.ucsd.xmlparser.entity.PhraseTypes;
 import edu.ucsd.xmlparser.entity.Word;
@@ -23,15 +21,21 @@ import edu.ucsd.xmlparser.repository.DocumentRepository;
 import edu.ucsd.xmlparser.repository.SentenceRepository;
 import edu.ucsd.xmlparser.util.Neo4jUtils;
 
-public class WhichQuestionHandler implements QuestionHandler {
+public class WhichQuestionHandler implements QuestionHandler, ApplicationContextAware {
+	private static Map<String, String> sentenceFormTypeToHandler = new HashMap<String, String>();
+	
+	static {
+		sentenceFormTypeToHandler.put("NNS", "nnsSentenceFormHandler");
+		sentenceFormTypeToHandler.put("NN", "nnsSentenceFormHandler");
+	}
+	
 	@Inject
 	private DocumentRepository documentRepository;
 	
 	@Inject
 	private SentenceRepository sentenceRepository;
 	
-	@Inject
-	private Neo4jTemplate template;
+	private ApplicationContext context;
 	
 	@Override
 	@Transactional
@@ -54,33 +58,14 @@ public class WhichQuestionHandler implements QuestionHandler {
 			if(verbAndNounEquivalents.size() > 0) {
 				List<Word> words = sentenceRepository.findWords(documentId, verbAndNounEquivalents); 
 				for(Word word : words) {
-					if(PhraseTypes.isNNS(word.getPosTag())) {
-						List<String> answers = new ArrayList<String>();
-						Node node = template.getNode(word.getId());
-						Iterator<Relationship> relationships = node.getRelationships(Direction.OUTGOING, ApplicationRelationshipType.WORD_DEPENDENCY).iterator();
-						while(relationships.hasNext()) {
-							Relationship rel = relationships.next();
-							if("prep_of".equals(rel.getProperty("dependency"))) {
-								Node endNode = rel.getEndNode();
-								if(NeTags.isOrganizationOrPerson((String)endNode.getProperty("neTag"))) {
-									answers.add((String)endNode.getProperty("text"));
-								}
-								Iterator<Relationship> rels = endNode.getRelationships(Direction.OUTGOING, ApplicationRelationshipType.WORD_DEPENDENCY).iterator();
-								while(rels.hasNext()) {
-									Relationship singleRel = rels.next();
-									if("conj_and".equals(singleRel.getProperty("dependency"))) {
-										Node endN = singleRel.getEndNode();
-										if(NeTags.isOrganizationOrPerson((String)endN.getProperty("neTag"))) {
-											answers.add((String)endN.getProperty("text"));
-										}
-									}
-								}
-							}
-						}
-						
-						answer = new ListAnswer(answers);
+					String handlerName = sentenceFormTypeToHandler.get(word.getPosTag());
+					if(handlerName != null) {
+						SentenceFormHandler sentenceHandler = SentenceFormHandler.class.cast(this.context.getBean(handlerName));
+						answer = sentenceHandler.handleWord(word);
+					} else {
+						System.out.println(word.getText() + ", " + word.getPosTag());
 					}
-				}
+				} 
 			}
 		}
 		
@@ -157,5 +142,11 @@ public class WhichQuestionHandler implements QuestionHandler {
 		} 
 		
 		return actor.trim();
+	}
+
+	@Override
+	public void setApplicationContext(ApplicationContext arg0)
+			throws BeansException {
+		this.context = arg0;
 	}
 }

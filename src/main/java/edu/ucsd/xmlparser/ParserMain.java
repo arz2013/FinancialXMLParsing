@@ -14,7 +14,8 @@ public class ParserMain {
 	public static void main(String[] args) throws Exception {
 		ApplicationContext context = SystemApplicationContext.getApplicationContext();
 
-		String[] fileNames = { "ShortenedTestDocument.xml", "ShortenedTestDocument2.xml" };
+		// String[] fileNames = { "ShortenedTestDocument.xml", "ShortenedTestDocument2.xml" };
+		String[] fileNames = { "Annual_Report_Chevron_2013.xml", "Annual_Report_Disney_2013.xml" };
 		List<File> files = new ArrayList<File>();
 		for(String fileName : fileNames) {
 			files.add(new File(ParserMain.class.getClassLoader().getResource(fileName).getFile()));

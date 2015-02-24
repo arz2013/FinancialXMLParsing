@@ -1,5 +1,6 @@
 package edu.ucsd.questionanswering;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -52,6 +53,8 @@ public class WhichQuestionHandler implements QuestionHandler, ApplicationContext
 		String actor = lookForActor(parsedQuestion, 2);
 		Long documentId = lookForMostProbablyDocument(actor);
 		
+		List<Answer> answers = new ArrayList<Answer>();
+		
 		if(documentId != null) {
 			// Look for Verb and Noun Equivalents
 			Set<String> verbAndNounEquivalents = lookForVerbAndNounEquivalents(parsedQuestion, 2);
@@ -61,12 +64,20 @@ public class WhichQuestionHandler implements QuestionHandler, ApplicationContext
 					String handlerName = sentenceFormTypeToHandler.get(word.getPosTag());
 					if(handlerName != null) {
 						SentenceFormHandler sentenceHandler = SentenceFormHandler.class.cast(this.context.getBean(handlerName));
-						answer = sentenceHandler.handleWord(word);
+						answers.add(sentenceHandler.handleWord(word));
 					} else {
-						System.out.println(word.getText() + ", " + word.getPosTag());
+						// System.out.println(word.getText() + ", " + word.getPosTag());
 					}
 				} 
 			}
+		}
+		
+		if(answers.size() > 0) {
+			List<String> answerRaws = new ArrayList<String>();
+			for(Answer ans : answers) {
+				answerRaws.add(ans.asText());
+			}
+			answer = new ListAnswer(answerRaws);
 		}
 		
 		return answer;

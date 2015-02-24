@@ -12,7 +12,9 @@ public class ListAnswer implements Answer {
 	@Override
 	public String asText() {
 		StringBuilder sb = new StringBuilder();
-		multipleStrings.stream().map(s -> sb.append(s + ". "));
+		for(String s : multipleStrings) {
+			sb.append(s);
+		}
 		return sb.toString();
 	}
 

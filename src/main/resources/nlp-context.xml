@@ -53,6 +53,8 @@
 
 	<bean name="whichQuestionHandler" class="edu.ucsd.questionanswering.WhichQuestionHandler"/>
  	
+ 	<bean name="nnsSentenceFormHandler" class="edu.ucsd.questionanswering.NNSSentenceFormHandler"/>
+ 	
     <util:map id="config">
 		<entry key="enable_remote_shell" value="true"/>
 	</util:map>

@@ -5,9 +5,29 @@
   <artifactId>FinancialXMLParser</artifactId>
   <packaging>jar</packaging>
   <version>1.0-SNAPSHOT</version>
-  <name>NLPNeo4J</name>
+  <name>FinancialXMLParser</name>
   <url>http://maven.apache.org</url>
   <dependencies>
+    <dependency>
+	<groupId>simplenlg</groupId>
+	<artifactId>lexAccess</artifactId>
+	<version>4.4</version>
+    </dependency>
+    <dependency>
+        <groupId>simplenlg</groupId>
+        <artifactId>lexCheck</artifactId>
+        <version>4.4</version>
+    </dependency>
+    <dependency>
+        <groupId>simplenlg</groupId>
+        <artifactId>lvg2011</artifactId>
+        <version>4.4</version>
+    </dependency>
+    <dependency>
+	<groupId>simplenlg</groupId>
+	<artifactId>simplenlg</artifactId>
+	<version>4.4.2</version>
+    </dependency>
     <dependency>
         <groupId>org.atteo</groupId>
         <artifactId>evo-inflector</artifactId>

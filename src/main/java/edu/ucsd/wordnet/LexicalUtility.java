@@ -10,8 +10,23 @@ import org.yawni.wordnet.Relation;
 import org.yawni.wordnet.WordNet;
 import org.yawni.wordnet.WordSense;
 
+import simplenlg.features.Feature;
+import simplenlg.features.Tense;
+import simplenlg.framework.InflectedWordElement;
+import simplenlg.framework.LexicalCategory;
+import simplenlg.framework.WordElement;
+import simplenlg.lexicon.Lexicon;
+import simplenlg.realiser.english.Realiser;
+
 public class LexicalUtility {
 	private static WordNet wordNet = WordNet.getInstance();
+	private static Lexicon lexicon;
+	private static Realiser realiser;
+	
+	static {
+		lexicon = Lexicon.getDefaultLexicon();
+        realiser = new Realiser(lexicon);
+	}
 	
 	public static Set<String> getNounsIncludingPluralFormsForVerb(String verbWord) {
 		List<WordSense> senses = wordNet.lookupWordSenses(verbWord, POS.VERB);
@@ -27,5 +42,13 @@ public class LexicalUtility {
 			}
 		}
 		return nounForms;
+	}
+	
+	public static String getPastTense(String verbWord) {
+		WordElement word = lexicon.getWord(verbWord, LexicalCategory.VERB);
+		InflectedWordElement infl = new InflectedWordElement(word);
+		infl.setFeature(Feature.TENSE, Tense.PAST);
+		
+		return realiser.realise(infl).getRealisation();
 	}
 }

@@ -44,7 +44,6 @@ public class VerbSentenceFormHandler implements SentenceFormHandler {
 		}
 		
 		return new SetAnswer(answers);
-
 	}
 	
 	private void appendRelationship(Node endNode, StringBuilder sb, String dependency) {
@@ -61,5 +60,4 @@ public class VerbSentenceFormHandler implements SentenceFormHandler {
 			} 
 		}
 	}
-	
 }

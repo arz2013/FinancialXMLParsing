@@ -27,6 +27,7 @@ public class QuestionAnsweringModule implements ApplicationContextAware {
 	
 	static {
 		questionHandlers.put("which", "whichQuestionHandler");
+		questionHandlers.put("when", "whenQuestionHandler");
 	}
 	
 	private ApplicationContext applicationContext;
@@ -51,12 +52,14 @@ public class QuestionAnsweringModule implements ApplicationContextAware {
 			questionTokens.add(tokenizer.nextToken());
 		}
 		
-		// Find Question Type
-		QuestionHandler questionHandler = (QuestionHandler)this.applicationContext.getBean(questionHandlers.get(questionTokens.get(0).toLowerCase()));
-		if(questionHandler == null) {
-			throw new IllegalArgumentException("Question type " + questionTokens.get(0) + " is unrecognized.");
+		String questionType = questionTokens.get(0).toLowerCase();
+		if(questionType == null) {
+			return new NoAnswer();
 		}
 		
+		// Find Question Type
+		QuestionHandler questionHandler = (QuestionHandler)this.applicationContext.getBean(questionHandlers.get(questionType));
+				
 		Annotation questionDocument = new Annotation(question);
 		pipeline.annotate(questionDocument);
 		

@@ -12,11 +12,19 @@ public class QuestionAnsweringMain {
 	public static void main(String[] args) {
 		ApplicationContext ctx = SystemApplicationContext.getApplicationContext();
 		QuestionAnsweringModule qaModule = QuestionAnsweringModule.class.cast(ctx.getBean("questionAnsweringModule"));
+		logger.info(qaModule.answer("When did Disney acquire Marvel?").toString());
+		// Questions that we can answer
+		/*
+		logger.info(qaModule.answer("Which organizations did Disney acquire?").toString());
+		logger.info(qaModule.answer("Which organizations did Walt Disney acquire?").toString());
 		logger.info(qaModule.answer("Which organizations did Chevron acquire?").toString());
-		/**
-		qaModule.answer("Which organizations did Walt Disney acquire?");
+		*/
+		// Cannot answer
+		/*
+		logger.info(qaModule.answer("Which organizations did Walt Sprint acquire?").toString());
+		*/
+		/*
 		qaModule.answer("What acquisitions did Chevron make?"); // Unable to answer this one
-		qaModule.answer("When did Disney acquire Marvel?");
 		*/
 	}
 

@@ -10,6 +10,8 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -25,10 +27,15 @@ import edu.ucsd.xmlparser.util.Neo4jUtils;
 
 public class WhichQuestionHandler implements QuestionHandler, ApplicationContextAware {
 	private static Map<String, String> sentenceFormTypeToHandler = new HashMap<String, String>();
+
+	private static Logger logger = LoggerFactory.getLogger(WhichQuestionHandler.class);
 	
 	static {
 		sentenceFormTypeToHandler.put("NNS", "nnsSentenceFormHandler");
 		sentenceFormTypeToHandler.put("NN", "nnsSentenceFormHandler");
+		sentenceFormTypeToHandler.put("VBD","verbSentenceFormHandler");
+		sentenceFormTypeToHandler.put("VB","verbSentenceFormHandler");
+		sentenceFormTypeToHandler.put("VBG","verbSentenceFormHandler");
 	}
 	
 	@Inject
@@ -60,8 +67,15 @@ public class WhichQuestionHandler implements QuestionHandler, ApplicationContext
 			// Look for Verb and Noun Equivalents
 			Set<String> verbAndNounEquivalents = lookForVerbAndNounEquivalents(parsedQuestion, 2);
 			if(verbAndNounEquivalents.size() > 0) {
-				List<Word> words = sentenceRepository.findWords(documentId, verbAndNounEquivalents); 
+				// We look for words that 
+				List<Word> words = sentenceRepository.findWords(documentId, verbAndNounEquivalents);
+				if(logger.isDebugEnabled()) {
+					logger.debug("Searching for occurence of the following verb and noun equivalents:");
+				}
 				for(Word word : words) {
+					if(logger.isDebugEnabled()) {
+						logger.debug(word.toString());
+					}
 					String handlerName = sentenceFormTypeToHandler.get(word.getPosTag());
 					if(handlerName != null) {
 						SentenceFormHandler sentenceHandler = SentenceFormHandler.class.cast(this.context.getBean(handlerName));
@@ -76,7 +90,9 @@ public class WhichQuestionHandler implements QuestionHandler, ApplicationContext
 		if(answers.size() > 0) {
 			Set<String> answerRaws = new HashSet<String>();
 			for(Answer ans : answers) {
-				answerRaws.add(ans.asText());
+				if(!ans.isNoAnswer()) {
+					answerRaws.add(ans.asText());
+				}
 			}
 			answer = new SetAnswer(answerRaws);
 		}

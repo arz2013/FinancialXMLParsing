@@ -75,12 +75,14 @@ public class Word {
 		return neTag;
 	}
 
+	
+	
 	@Override
 	public String toString() {
-		return "Word [text=" + text + ", position=" + position + ", posTag="
-				+ posTag + ", neTag=" + neTag + "]";
+		return "Word [id=" + id + ", text=" + text + ", position=" + position
+				+ ", posTag=" + posTag + ", neTag=" + neTag + "]";
 	}
-	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;

@@ -17,8 +17,7 @@
     
     <neo4j:config graphDatabaseService="graphDatabaseService" base-package="edu.ucsd.xmlparser.entity"/>
     
-    <neo4j:repositories base-package="edu.ucsd.query.repository"/>
-    <neo4j:repositories base-package="edu.ucsd.xmlparser.repository"/>    
+    <import resource="nlp-repository.xml"/>
     
     <tx:annotation-driven/>
   

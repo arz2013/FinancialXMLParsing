@@ -2,21 +2,31 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>edu.ucsd</groupId>
-  <artifactId>NLPNeo4J</artifactId>
+  <artifactId>FinancialXMLParser</artifactId>
   <packaging>jar</packaging>
   <version>1.0-SNAPSHOT</version>
   <name>NLPNeo4J</name>
   <url>http://maven.apache.org</url>
   <dependencies>
-  	<dependency>
-		<groupId>javax.inject</groupId>
-		<artifactId>javax.inject</artifactId>
-		<version>1</version>
+    <dependency>
+  	<groupId>org.yawni</groupId>
+  	<artifactId>yawni-wordnet-api</artifactId>
+        <version>2.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
-  		<groupId>edu.stanford.nlp</groupId>
-  		<artifactId>stanford-parser</artifactId>
-  		<version>3.3.1</version>
+      	<groupId>org.yawni</groupId>
+      	<artifactId>yawni-wordnet-data30</artifactId>
+      	<version>2.0.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+	<groupId>javax.inject</groupId>
+	<artifactId>javax.inject</artifactId>
+	<version>1</version>
+    </dependency>
+    <dependency>
+  	<groupId>edu.stanford.nlp</groupId>
+  	<artifactId>stanford-parser</artifactId>
+  	<version>3.3.1</version>
     </dependency>
     <dependency>
         <groupId>edu.stanford.nlp</groupId>

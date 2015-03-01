@@ -27,9 +27,10 @@ public class NNSSentenceFormHandler implements SentenceFormHandler {
 		while(relationships.hasNext()) {
 			Relationship rel = relationships.next();
 			if("prep_of".equals(rel.getProperty("dependency"))) {
+				StringBuilder sb = new StringBuilder();
 				Node endNode = rel.getEndNode();
 				if(NeTags.isOrganizationOrPerson((String)endNode.getProperty("neTag"))) {
-					answers.add((String)endNode.getProperty("text"));
+					sb.append((String)endNode.getProperty("text"));
 				} 
 				Iterator<Relationship> rels = endNode.getRelationships(Direction.OUTGOING, ApplicationRelationshipType.WORD_DEPENDENCY).iterator();
 				while(rels.hasNext()) {
@@ -37,14 +38,24 @@ public class NNSSentenceFormHandler implements SentenceFormHandler {
 					if("conj_and".equals(singleRel.getProperty("dependency")) || "nn".equals(singleRel.getProperty("dependency"))) {
 						Node endN = singleRel.getEndNode();
 						if(NeTags.isOrganizationOrPerson((String)endN.getProperty("neTag"))) {
-							answers.add((String)endN.getProperty("text"));
+							sb.append(" ");
+							sb.append((String)endN.getProperty("text"));
 						}
 					} 
+				}
+		
+				String answer = sb.toString();
+				if(!"".equals(answer)) {
+					answers.add(answer);
 				}
 			} 
 		}
 		
-		return new SetAnswer(answers);
+		if(answers.size() > 0) {
+			return new SetAnswer(answers);
+		}
+		
+		return new NoAnswer();
 	}
 
 }

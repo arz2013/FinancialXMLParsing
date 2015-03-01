@@ -36,6 +36,8 @@ public class WhichQuestionHandler implements QuestionHandler, ApplicationContext
 		sentenceFormTypeToHandler.put("VBD","verbSentenceFormHandler");
 		sentenceFormTypeToHandler.put("VB","verbSentenceFormHandler");
 		sentenceFormTypeToHandler.put("VBG","verbSentenceFormHandler");
+		sentenceFormTypeToHandler.put("VBN","verbSentenceFormHandler");
+		sentenceFormTypeToHandler.put("VBP","verbSentenceFormHandler");
 	}
 	
 	@Inject
@@ -81,7 +83,7 @@ public class WhichQuestionHandler implements QuestionHandler, ApplicationContext
 						SentenceFormHandler sentenceHandler = SentenceFormHandler.class.cast(this.context.getBean(handlerName));
 						answers.add(sentenceHandler.handleWord(word));
 					} else {
-						// System.out.println(word.getText() + ", " + word.getPosTag());
+						logger.info("No handler for : " + word);
 					}
 				} 
 			}
@@ -91,7 +93,12 @@ public class WhichQuestionHandler implements QuestionHandler, ApplicationContext
 			Set<String> answerRaws = new HashSet<String>();
 			for(Answer ans : answers) {
 				if(!ans.isNoAnswer()) {
-					answerRaws.add(ans.asText());
+					if(logger.isDebugEnabled()) {
+						logger.debug("Raw Answer: " + ans.asText());
+					}
+					if(!ans.asText().trim().equals("")) {
+						answerRaws.add(ans.asText());
+					}
 				}
 			}
 			answer = new SetAnswer(answerRaws);

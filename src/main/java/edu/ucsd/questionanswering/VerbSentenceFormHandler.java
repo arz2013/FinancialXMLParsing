@@ -36,6 +36,8 @@ public class VerbSentenceFormHandler implements SentenceFormHandler {
 				if(NeTags.isOrganizationOrPerson((String)endNode.getProperty("neTag"))) {
 					sb.append((String)endNode.getProperty("text"));
 					appendRelationship(endNode, sb, "appos");
+					appendRelationship(endNode, sb, "conj_and");
+					appendRelationship(endNode, sb, "nn");
 				} 
 				answers.add(sb.toString());
 			} 

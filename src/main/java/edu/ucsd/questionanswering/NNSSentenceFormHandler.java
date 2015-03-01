@@ -1,8 +1,8 @@
 package edu.ucsd.questionanswering;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -21,7 +21,7 @@ public class NNSSentenceFormHandler implements SentenceFormHandler {
 	
 	@Override
 	public Answer handleWord(Word word) {
-		List<String> answers = new ArrayList<String>();
+		Set<String> answers = new HashSet<String>();
 		Node node = template.getNode(word.getId());
 		Iterator<Relationship> relationships = node.getRelationships(Direction.OUTGOING, ApplicationRelationshipType.WORD_DEPENDENCY).iterator();
 		while(relationships.hasNext()) {
@@ -44,7 +44,7 @@ public class NNSSentenceFormHandler implements SentenceFormHandler {
 			} 
 		}
 		
-		return new ListAnswer(answers);
+		return new SetAnswer(answers);
 	}
 
 }

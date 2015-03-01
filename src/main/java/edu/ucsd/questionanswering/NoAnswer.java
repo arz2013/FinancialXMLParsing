@@ -7,4 +7,8 @@ public class NoAnswer implements Answer {
 		return "Answer Unavailable.";
 	}
 
+	@Override
+	public boolean isNoAnswer() {
+		return true;
+	}
 }

@@ -15,6 +15,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.transaction.annotation.Transactional;
 
+import edu.ucsd.wordnet.LexicalUtility;
 import edu.ucsd.xmlparser.entity.NeTags;
 import edu.ucsd.xmlparser.entity.PhraseTypes;
 import edu.ucsd.xmlparser.entity.Word;
@@ -73,11 +74,11 @@ public class WhichQuestionHandler implements QuestionHandler, ApplicationContext
 		}
 		
 		if(answers.size() > 0) {
-			List<String> answerRaws = new ArrayList<String>();
+			Set<String> answerRaws = new HashSet<String>();
 			for(Answer ans : answers) {
 				answerRaws.add(ans.asText());
 			}
-			answer = new ListAnswer(answerRaws);
+			answer = new SetAnswer(answerRaws);
 		}
 		
 		return answer;
@@ -87,20 +88,27 @@ public class WhichQuestionHandler implements QuestionHandler, ApplicationContext
 			List<ParsedWord> parsedQuestion, int index) {
 		Set<String> verbsAndNounEquivalents = new HashSet<String>();
 		String verb = "";
+		boolean likelyPresentTense = false;
 		
 		for(int i = index; i < parsedQuestion.size(); i++) {
 			ParsedWord pw = parsedQuestion.get(i);
 			if(PhraseTypes.isVB(pw.getPosTag())) {
 				verb = pw.getWord();
 				verbsAndNounEquivalents.add(pw.getWord());
+				if(pw.isLikelyPresentTense()) {
+					likelyPresentTense = true;
+				}
 				break;
 			}
 		}
 		
-		if("acquire".equals(verb)) {
-			verbsAndNounEquivalents.add("acquired");
-			verbsAndNounEquivalents.add("acquisition");
-			verbsAndNounEquivalents.add("acquisitions");
+		if(verb == null || "".equals(verb)) {
+			throw new IllegalArgumentException("A Verb needs to specified for Which type questions");
+		}
+		
+		verbsAndNounEquivalents.addAll(LexicalUtility.getNounsIncludingPluralFormsForVerb(verb));
+		if(likelyPresentTense) {
+			verbsAndNounEquivalents.add(LexicalUtility.getPastTense(verb));
 		}
 		
 		return verbsAndNounEquivalents;

@@ -29,4 +29,8 @@ public class ParsedWord {
 	public String getLemma() {
 		return lemma;
 	}
+
+	public boolean isLikelyPresentTense() {
+		return getWord().toLowerCase().equals(getLemma().toLowerCase());
+	}
 }

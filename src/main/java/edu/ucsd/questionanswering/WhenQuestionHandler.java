@@ -87,14 +87,30 @@ public class WhenQuestionHandler implements QuestionHandler, ApplicationContextA
 					logger.debug("Number of words: " + words.size());
 					for(Word word : words) {
 						Node node = template.getNode(word.getId());
+						Node sentence = node.getRelationships(Direction.INCOMING, ApplicationRelationshipType.HAS_WORD).iterator().next().getStartNode();
 						Iterator<Relationship> rels = node.getRelationships(Direction.OUTGOING, ApplicationRelationshipType.WORD_DEPENDENCY).iterator();
+						String dateString = "";
+						String company = "";
+						logger.info(sentence.getProperty("text").toString());
 						while(rels.hasNext()) {
 							Relationship rel = rels.next();
 							if(rel.getProperty("dependency").equals("prep_in")) {
 								logger.info(rel.getEndNode().getProperty("neTag").toString());
 								if(rel.getEndNode().getProperty("neTag").equals(NeTags.DATE.name())) {
-									answers.add(QAUtils.getPhrase(rel.getEndNode()));
+									dateString = QAUtils.getPhrase(rel.getEndNode());
+								} else {
+									break;
 								}
+							} else if(rel.getProperty("dependency").equals("dobj")) {
+								company = QAUtils.getPhrase(rel.getEndNode());
+							} else if(rel.getProperty("dependency").equals("prep_of")) {
+								company = QAUtils.getPhrase(rel.getEndNode());
+							}
+						}
+						
+						if(!dateString.equals("")) {
+							if(company.contains(object)) {
+								answers.add(dateString);
 							}
 						}
 					}

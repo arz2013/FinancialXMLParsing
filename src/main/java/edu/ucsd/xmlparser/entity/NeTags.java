@@ -1,7 +1,7 @@
 package edu.ucsd.xmlparser.entity;
 
 public enum NeTags {
-	ORGANIZATION, PERSON, MONEY;
+	ORGANIZATION, PERSON, MONEY, DATE;
 	
 	public static boolean isValid(String nameEntity) {
 		for(NeTags tag : NeTags.values()) {

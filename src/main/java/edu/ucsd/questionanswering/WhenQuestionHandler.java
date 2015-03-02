@@ -1,6 +1,5 @@
 package edu.ucsd.questionanswering;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -10,14 +9,19 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.neo4j.graphdb.Direction;
+import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Relationship;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.data.neo4j.support.Neo4jTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
 import edu.ucsd.wordnet.LexicalUtility;
+import edu.ucsd.xmlparser.entity.ApplicationRelationshipType;
 import edu.ucsd.xmlparser.entity.NeTags;
 import edu.ucsd.xmlparser.entity.PhraseTypes;
 import edu.ucsd.xmlparser.entity.Word;
@@ -50,6 +54,9 @@ public class WhenQuestionHandler implements QuestionHandler, ApplicationContextA
 	@Inject
 	private NameEntityPhraseNodeRepository neRepository;
 	
+	@Inject
+	private Neo4jTemplate template;
+	
 	private ApplicationContext applicationContext;
 
 	@Override
@@ -61,7 +68,7 @@ public class WhenQuestionHandler implements QuestionHandler, ApplicationContextA
 		String actor = lookForActor(parsedQuestion, 2);
 		Long documentId = lookForMostProbablyDocument(actor);
 		
-		List<Answer> answers = new ArrayList<Answer>();
+		Set<String> answers = new HashSet<String>();
 		
 		if(documentId != null) {
 			// Look for Verb and Noun Equivalents
@@ -75,25 +82,28 @@ public class WhenQuestionHandler implements QuestionHandler, ApplicationContextA
 				logger.debug("Number of ne candidate sentences: " + neSentenceIds.size());
 				Set<Long> trueCandidateSentenceIds = intersection(sentenceIds, neSentenceIds);
 				logger.debug("Number of true candidate sentence ids: " + trueCandidateSentenceIds.size());
-				if(logger.isDebugEnabled()) {
-					logger.debug("Searching for occurence of the following verb and noun equivalents:");
+				if(trueCandidateSentenceIds.size() > 0) {
+					Set<Word> words = sentenceRepository.findWordsWithSentenceIdsAndWords(trueCandidateSentenceIds, verbAndNounEquivalents);
+					logger.debug("Number of words: " + words.size());
+					for(Word word : words) {
+						Node node = template.getNode(word.getId());
+						Iterator<Relationship> rels = node.getRelationships(Direction.OUTGOING, ApplicationRelationshipType.WORD_DEPENDENCY).iterator();
+						while(rels.hasNext()) {
+							Relationship rel = rels.next();
+							if(rel.getProperty("dependency").equals("prep_in")) {
+								logger.info(rel.getEndNode().getProperty("neTag").toString());
+								if(rel.getEndNode().getProperty("neTag").equals(NeTags.DATE.name())) {
+									answers.add(QAUtils.getPhrase(rel.getEndNode()));
+								}
+							}
+						}
+					}
 				}
 			}
 		}
 		
 		if(answers.size() > 0) {
-			Set<String> answerRaws = new HashSet<String>();
-			for(Answer ans : answers) {
-				if(!ans.isNoAnswer()) {
-					if(logger.isDebugEnabled()) {
-						logger.debug("Raw Answer: " + ans.asText());
-					}
-					if(!ans.asText().trim().equals("")) {
-						answerRaws.add(ans.asText());
-					}
-				}
-			}
-			answer = new SetAnswer(answerRaws);
+			answer = new SetAnswer(answers);
 		}
 		
 		return answer;

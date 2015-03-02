@@ -45,4 +45,9 @@ public interface SentenceRepository extends GraphRepository<Sentence> {
 
 	@Query("match (d:Document)-[:HAS_SENTENCE]->(s:Sentence)-[:HAS_WORD]->(w:Word) where id(d) = {0} and w.text in {1} return id(s)")
 	public Set<Long> findSentenceIds(Long documentId, Set<String> verbAndNounEquivalents);
+
+	@Query("match (s:Sentence)-[:HAS_WORD]->(w:Word) where id(s) in {0} and w.text in {1} return w")
+	public Set<Word> findWordsWithSentenceIdsAndWords(
+			Set<Long> trueCandidateSentenceIds,
+			Set<String> verbAndNounEquivalents);
 }

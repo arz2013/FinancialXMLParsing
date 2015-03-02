@@ -13,15 +13,23 @@ import org.neo4j.graphdb.Relationship;
 import edu.ucsd.xmlparser.entity.ApplicationRelationshipType;
 
 public class QAUtils {
+	private static void expandForWords(Node phraseNode, List<Node> words) {
+		if(phraseNode.hasProperty("text")) {
+			words.add(phraseNode);
+		}
+		Iterator<Relationship> rels = phraseNode.getRelationships(Direction.OUTGOING, ApplicationRelationshipType.HAS_PARSE_CHILD).iterator();
+		while(rels.hasNext()) {
+			Relationship rel = rels.next();
+			expandForWords(rel.getEndNode(), words);
+		}	
+	}
+	
 	public static String getPhrase(Node endNode) {
 		Iterator<Relationship> rels = endNode.getRelationships(Direction.INCOMING, ApplicationRelationshipType.HAS_PARSE_CHILD).iterator();
 		rels = rels.next().getStartNode().getRelationships(Direction.INCOMING, ApplicationRelationshipType.HAS_PARSE_CHILD).iterator();
 		Node phraseNode = rels.next().getStartNode();
 		List<Node> words = new ArrayList<Node>();
-		rels = phraseNode.getRelationships(Direction.OUTGOING, ApplicationRelationshipType.HAS_PARSE_CHILD).iterator();
-		while(rels.hasNext()) {
-			words.add(rels.next().getEndNode().getRelationships(Direction.OUTGOING, ApplicationRelationshipType.HAS_PARSE_CHILD).iterator().next().getEndNode());
-		}
+		expandForWords(phraseNode, words);
 		Collections.sort(words, new Comparator<Node>() {
 			@Override
 			public int compare(Node o1, Node o2) {

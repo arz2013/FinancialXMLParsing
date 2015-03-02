@@ -33,7 +33,7 @@ import edu.ucsd.xmlparser.util.Neo4jUtils;
 public class WhenQuestionHandler implements QuestionHandler, ApplicationContextAware {
 	private static Map<String, String> sentenceFormTypeToHandler = new HashMap<String, String>();
 
-	private static Logger logger = LoggerFactory.getLogger(WhichQuestionHandler.class);
+	private static Logger logger = LoggerFactory.getLogger(WhenQuestionHandler.class);
 	
 	static {
 		sentenceFormTypeToHandler.put("NNS", "nnsSentenceFormHandler");
@@ -91,11 +91,10 @@ public class WhenQuestionHandler implements QuestionHandler, ApplicationContextA
 						Iterator<Relationship> rels = node.getRelationships(Direction.OUTGOING, ApplicationRelationshipType.WORD_DEPENDENCY).iterator();
 						String dateString = "";
 						String company = "";
-						logger.info(sentence.getProperty("text").toString());
 						while(rels.hasNext()) {
 							Relationship rel = rels.next();
-							if(rel.getProperty("dependency").equals("prep_in")) {
-								logger.info(rel.getEndNode().getProperty("neTag").toString());
+							logger.info(rel.getProperty("dependency").toString());
+							if(rel.getProperty("dependency").equals("prep_in") || rel.getProperty("dependency").equals("prep_on")) {
 								if(rel.getEndNode().getProperty("neTag").equals(NeTags.DATE.name())) {
 									dateString = QAUtils.getPhrase(rel.getEndNode());
 								} else {
@@ -105,6 +104,7 @@ public class WhenQuestionHandler implements QuestionHandler, ApplicationContextA
 								company = QAUtils.getPhrase(rel.getEndNode());
 							} else if(rel.getProperty("dependency").equals("prep_of")) {
 								company = QAUtils.getPhrase(rel.getEndNode());
+								logger.info(company);
 							}
 						}
 						

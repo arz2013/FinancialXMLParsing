@@ -12,7 +12,8 @@ public class QuestionAnsweringMain {
 	public static void main(String[] args) {
 		ApplicationContext ctx = SystemApplicationContext.getApplicationContext();
 		QuestionAnsweringModule qaModule = QuestionAnsweringModule.class.cast(ctx.getBean("questionAnsweringModule"));
-		logger.info(qaModule.answer("Tell me about segment operating income.").toString());
+		logger.info(qaModule.answer("Tell me about Walt Disney.").toString());
+
 		//logger.info(qaModule.answer("When did Disney sell Miramax?").toString());
 		// Questions that we can answer
 		
@@ -22,6 +23,7 @@ public class QuestionAnsweringMain {
 		logger.info(qaModule.answer("When did Chevron acquire Atlas Energy?").toString());
 		logger.info(qaModule.answer("Which organizations did Disney sell?").toString());
 		logger.info(qaModule.answer("When did Disney acquire Das Vierte?").toString());
+		logger.info(qaModule.answer("Tell me about segment operating income.").toString());
 		*/
 		// Cannot answer
 		/*

@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import edu.ucsd.xmlparser.entity.Sentence;
 import edu.ucsd.xmlparser.repository.CValueRepository;
+import edu.ucsd.xmlparser.repository.NameEntityPhraseNodeRepository;
 import edu.ucsd.xmlparser.repository.SentenceRepository;
 
 public class TellMeQuestionHandler implements QuestionHandler {
@@ -25,6 +26,9 @@ public class TellMeQuestionHandler implements QuestionHandler {
 	
 	@Inject
 	private SentenceRepository sentenceRepository;
+	
+	@Inject
+	private NameEntityPhraseNodeRepository neRepository;
 	
 	@Override
 	@Transactional
@@ -61,9 +65,30 @@ public class TellMeQuestionHandler implements QuestionHandler {
 					}
 				}
 				answer = new SetAnswer(candidates);
+			} 
+		} else { // Look up Name Entity
+			Set<Long> neSentenceIds = neRepository.getSentenceIdsContainingNameEntity(aboutParameter);
+			List<Sentence> sentences = sentenceRepository.getSentenceById(neSentenceIds);
+			sentences = sentences.stream().filter(s -> s.getScore() != null).collect(Collectors.toList());
+			Collections.sort(sentences, new Comparator<Sentence>() {
+				@Override
+				// Sort in descending order
+				public int compare(Sentence o1, Sentence o2) {
+					return o2.getScore().compareTo(o1.getScore());
+				}
+			});
+			if(sentences.size() > 0) {
+				Double score = -1.0;
+				Set<String> candidates = new HashSet<String>();
+				for(Sentence sentence : sentences) {
+					if(sentence.getScore() > score) {
+						score = sentence.getScore();
+						candidates.add(sentence.getText());
+					}
+				}
+				answer = new SetAnswer(candidates);
 			}
 		}
-		
 		
 		return answer;
 	}

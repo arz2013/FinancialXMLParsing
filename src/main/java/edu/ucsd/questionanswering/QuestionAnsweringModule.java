@@ -28,6 +28,7 @@ public class QuestionAnsweringModule implements ApplicationContextAware {
 	static {
 		questionHandlers.put("which", "whichQuestionHandler");
 		questionHandlers.put("when", "whenQuestionHandler");
+		questionHandlers.put("tell", "tellMeQuestionHandler");
 	}
 	
 	private ApplicationContext applicationContext;

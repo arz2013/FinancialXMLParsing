@@ -98,6 +98,9 @@ public class WhenQuestionHandler implements QuestionHandler, ApplicationContextA
 								if(rel.getEndNode().getProperty("neTag").equals(NeTags.DATE.name())) {
 									dateString = QAUtils.getPhrase(rel.getEndNode());
 								} else {
+									if(logger.isDebugEnabled()) {
+										logger.debug(rel.getEndNode().getProperty("text").toString() + ", " + rel.getEndNode().getProperty("neTag").toString());
+									}
 									break;
 								}
 							} else if(rel.getProperty("dependency").equals("dobj")) {

@@ -32,14 +32,16 @@ public class VerbSentenceFormHandler implements SentenceFormHandler {
 			Relationship rel = relationships.next();
 			if("dobj".equals(rel.getProperty("dependency"))) {
 				StringBuilder sb = new StringBuilder();
+				String phrase = "";
 				Node endNode = rel.getEndNode();
 				if(NeTags.isOrganizationOrPerson((String)endNode.getProperty("neTag"))) {
+					phrase = QAUtils.getPhrase(endNode);
 					sb.append((String)endNode.getProperty("text"));
 					appendRelationship(endNode, sb, "appos");
 					appendRelationship(endNode, sb, "conj_and");
 					appendRelationship(endNode, sb, "nn");
 				} 
-				answers.add(sb.toString());
+				answers.add(phrase);
 			} 
 		}
 		

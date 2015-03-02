@@ -10,9 +10,6 @@ import java.util.Map;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
-import org.neo4j.graphdb.index.Index;
-import org.neo4j.graphdb.index.IndexManager;
-import org.neo4j.helpers.collection.MapUtil;
 import org.springframework.data.neo4j.support.Neo4jTemplate;
 
 import edu.stanford.nlp.trees.Tree;
@@ -38,7 +35,6 @@ public class StanfordParseTreeSaver {
 	private Map<Word.TextAndPosition, Word> seenWords;
 	private Neo4jTemplate template;
 	private Map<Node, List<Word>> parentToWordsPhrase;
-	private Index<Node> fullTextAndNeTagPhrase;
 	
 	private boolean isExcludeRoot = true;
 	
@@ -66,9 +62,6 @@ public class StanfordParseTreeSaver {
 		this.sentence = sentence;
 		this.seenWords = seenWords;
 		this.parentToWordsPhrase = new HashMap<Node, List<Word>>();
-		IndexManager indexManager = template.getGraphDatabaseService().index();
-		// Specify a Lucene Index
-		this.fullTextAndNeTagPhrase = indexManager.forNodes("phrase-fulltext", MapUtil.stringMap( IndexManager.PROVIDER, "lucene", "type", "fulltext"));
 	}
 	
 	public void performDepthFirstTraversal(Tree tree, Long sectionId, Long documentId) {

@@ -27,26 +27,36 @@ public class NNSSentenceFormHandler implements SentenceFormHandler {
 		while(relationships.hasNext()) {
 			Relationship rel = relationships.next();
 			if("prep_of".equals(rel.getProperty("dependency"))) {
+				String phrase = "";
 				StringBuilder sb = new StringBuilder();
 				Node endNode = rel.getEndNode();
 				if(NeTags.isOrganizationOrPerson((String)endNode.getProperty("neTag"))) {
 					sb.append((String)endNode.getProperty("text"));
+					phrase = QAUtils.getPhrase(endNode);
 				} 
-				Iterator<Relationship> rels = endNode.getRelationships(Direction.OUTGOING, ApplicationRelationshipType.WORD_DEPENDENCY).iterator();
-				while(rels.hasNext()) {
-					Relationship singleRel = rels.next();
-					if("conj_and".equals(singleRel.getProperty("dependency")) || "nn".equals(singleRel.getProperty("dependency"))) {
-						Node endN = singleRel.getEndNode();
-						if(NeTags.isOrganizationOrPerson((String)endN.getProperty("neTag"))) {
-							sb.append(" ");
-							sb.append((String)endN.getProperty("text"));
-						}
-					} 
+				
+				if(phrase.equals("")) {
+					Iterator<Relationship> rels = endNode.getRelationships(Direction.OUTGOING, ApplicationRelationshipType.WORD_DEPENDENCY).iterator();
+					while(rels.hasNext()) {
+						Relationship singleRel = rels.next();
+						if("conj_and".equals(singleRel.getProperty("dependency")) || "nn".equals(singleRel.getProperty("dependency"))) {
+							Node endN = singleRel.getEndNode();
+							if(NeTags.isOrganizationOrPerson((String)endN.getProperty("neTag"))) {
+								sb.append(" ");
+								sb.append((String)endN.getProperty("text"));
+								phrase = QAUtils.getPhrase(endNode);
+							}
+						} 
+					}
 				}
-		
-				String answer = sb.toString();
+				
+				/*
+				String answer = sb.toString().trim();
 				if(!"".equals(answer)) {
 					answers.add(answer);
+				}*/
+				if(!"".equals(phrase)) {
+					answers.add(phrase);
 				}
 			} 
 		}
@@ -57,5 +67,4 @@ public class NNSSentenceFormHandler implements SentenceFormHandler {
 		
 		return new NoAnswer();
 	}
-
 }

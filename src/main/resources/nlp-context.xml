@@ -51,7 +51,7 @@
  	<bean name="documentContains" class="edu.ucsd.query.function.DocumentContains"/>
 
 	<bean name="whichQuestionHandler" class="edu.ucsd.questionanswering.WhichQuestionHandler"/>
- 	
+ 	<bean name="whenQuestionHandler" class="edu.ucsd.questionanswering.WhenQuestionHandler"/>	
  	<bean name="nnsSentenceFormHandler" class="edu.ucsd.questionanswering.NNSSentenceFormHandler"/>
 	<bean name="verbSentenceFormHandler" class="edu.ucsd.questionanswering.VerbSentenceFormHandler"/>
 	 	

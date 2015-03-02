@@ -50,4 +50,7 @@ public interface SentenceRepository extends GraphRepository<Sentence> {
 	public Set<Word> findWordsWithSentenceIdsAndWords(
 			Set<Long> trueCandidateSentenceIds,
 			Set<String> verbAndNounEquivalents);
+
+	@Query("match (s:Sentence) where id(s) in {0} return s")
+	public List<Sentence> getSentenceById(Set<Long> cValueSentenceIds);
 }

@@ -22,6 +22,7 @@ import edu.ucsd.xmlparser.entity.NeTags;
 import edu.ucsd.xmlparser.entity.PhraseTypes;
 import edu.ucsd.xmlparser.entity.Word;
 import edu.ucsd.xmlparser.repository.DocumentRepository;
+import edu.ucsd.xmlparser.repository.NameEntityPhraseNodeRepository;
 import edu.ucsd.xmlparser.repository.SentenceRepository;
 import edu.ucsd.xmlparser.util.Neo4jUtils;
 
@@ -46,19 +47,16 @@ public class WhenQuestionHandler implements QuestionHandler, ApplicationContextA
 	@Inject
 	private SentenceRepository sentenceRepository;
 	
+	@Inject
+	private NameEntityPhraseNodeRepository neRepository;
+	
 	private ApplicationContext applicationContext;
 
 	@Override
 	@Transactional
 	public Answer answerQuestion(List<ParsedWord> parsedQuestion) {
 		Answer answer = new NoAnswer();
-		
-		// This is what we are looking for
-		String answerNameEntityType = parsedQuestion.get(1).getLemma();
-		if(!NeTags.isValid(answerNameEntityType))  {
-			throw new IllegalArgumentException("Unsupported argument to question starting with which : " + answerNameEntityType);
-		}
-		
+			
 		// Look for Actor
 		String actor = lookForActor(parsedQuestion, 2);
 		Long documentId = lookForMostProbablyDocument(actor);
@@ -67,25 +65,19 @@ public class WhenQuestionHandler implements QuestionHandler, ApplicationContextA
 		
 		if(documentId != null) {
 			// Look for Verb and Noun Equivalents
-			Set<String> verbAndNounEquivalents = lookForVerbAndNounEquivalents(parsedQuestion, 2);
+			Set<String> verbAndNounEquivalents = lookForVerbAndNounEquivalents(parsedQuestion, 2); 
 			if(verbAndNounEquivalents.size() > 0) {
+				String object = lookForSentenceObject(parsedQuestion, 3);
 				// We look for words that 
-				List<Word> words = sentenceRepository.findWords(documentId, verbAndNounEquivalents);
+				Set<Long> sentenceIds = sentenceRepository.findSentenceIds(documentId, verbAndNounEquivalents);
+				logger.debug("Number of candidate sentences: " + sentenceIds.size());
+				Set<Long> neSentenceIds = neRepository.getSentenceIdsContainingNameEntity(documentId, object);
+				logger.debug("Number of ne candidate sentences: " + neSentenceIds.size());
+				Set<Long> trueCandidateSentenceIds = intersection(sentenceIds, neSentenceIds);
+				logger.debug("Number of true candidate sentence ids: " + trueCandidateSentenceIds.size());
 				if(logger.isDebugEnabled()) {
 					logger.debug("Searching for occurence of the following verb and noun equivalents:");
 				}
-				for(Word word : words) {
-					if(logger.isDebugEnabled()) {
-						logger.debug(word.toString());
-					}
-					String handlerName = sentenceFormTypeToHandler.get(word.getPosTag());
-					if(handlerName != null) {
-						SentenceFormHandler sentenceHandler = SentenceFormHandler.class.cast(this.applicationContext.getBean(handlerName));
-						answers.add(sentenceHandler.handleWord(word));
-					} else {
-						logger.info("No handler for : " + word);
-					}
-				} 
 			}
 		}
 		
@@ -105,6 +97,30 @@ public class WhenQuestionHandler implements QuestionHandler, ApplicationContextA
 		}
 		
 		return answer;
+	}
+
+	private Set<Long> intersection(Set<Long> sentenceIds,
+			Set<Long> neSentenceIds) {
+		Set<Long> intersect = new HashSet<Long>();
+		for(Long sId : sentenceIds) {
+			if(neSentenceIds.contains(sId)) {
+				intersect.add(sId);
+			}
+		}
+		
+		return intersect;
+	}
+
+	private String lookForSentenceObject(List<ParsedWord> parsedQuestion, int i) {
+		StringBuilder sb = new StringBuilder();
+		for(int index = i; index < parsedQuestion.size(); index++) {
+			String posTag = parsedQuestion.get(index).getPosTag();
+			if(PhraseTypes.isNNP(posTag)) {
+				sb.append(parsedQuestion.get(index).getWord());
+				sb.append(" ");
+			}
+		}
+		return sb.toString().trim();
 	}
 
 	private Set<String> lookForVerbAndNounEquivalents(

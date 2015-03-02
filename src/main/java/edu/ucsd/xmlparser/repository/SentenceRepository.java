@@ -27,8 +27,7 @@ public interface SentenceRepository extends GraphRepository<Sentence> {
 	
 	@Query("match (w:_Word{text <> \"ROOT\", neTag = {0}}) return w")
 	public List<Word> getWordsWithNeTag(String neTag);
-	
-	
+		
 	@Query("match (s:_Sentence)-[h:HAS_WORD]->(w:_Word) where s.sNum = {0} and (w.position >= {1} and w.position < {2}) return w;")
 	public List<Node> getWordsFromTo(int sentenceNumber, int wordPositionFrom, int wordPositionTo);
 
@@ -43,4 +42,7 @@ public interface SentenceRepository extends GraphRepository<Sentence> {
 
 	@Query("match (d:Document)-[:HAS_SENTENCE]->(s:Sentence)-[:HAS_WORD]->(w:Word) where id(d) = {0} and w.text in {1} return w")
 	public List<Word> findWords(Long documentId, Set<String> verbAndNounEquivalents);
+
+	@Query("match (d:Document)-[:HAS_SENTENCE]->(s:Sentence)-[:HAS_WORD]->(w:Word) where id(d) = {0} and w.text in {1} return id(s)")
+	public Set<Long> findSentenceIds(Long documentId, Set<String> verbAndNounEquivalents);
 }

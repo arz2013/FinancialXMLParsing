@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -24,6 +26,7 @@ import edu.stanford.nlp.util.CoreMap;
 
 public class QuestionAnsweringModule implements ApplicationContextAware {
 	private static Map<String, String> questionHandlers = new HashMap<String, String>();
+	private static Logger logger = LoggerFactory.getLogger(QuestionAnsweringModule.class);
 	
 	static {
 		questionHandlers.put("which", "whichQuestionHandler");
@@ -86,6 +89,7 @@ public class QuestionAnsweringModule implements ApplicationContextAware {
 			}
 		}
 		
+		logger.info("You asked: " + question + " and the answer is: ");
 		return questionHandler.answerQuestion(parsedQuestion);
 	}
 

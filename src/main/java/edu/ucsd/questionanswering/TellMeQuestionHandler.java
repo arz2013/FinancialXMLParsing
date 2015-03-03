@@ -42,9 +42,10 @@ public class TellMeQuestionHandler implements QuestionHandler {
 		if(logger.isDebugEnabled()) {
 			logger.debug("Parameter: " + aboutParameter);
 		}
-		logger.info("Parameter: " + aboutParameter);
 		Set<Long> cValueSentenceIds = cValueRepository.getSentenceIds(aboutParameter);
-		logger.info("Number of sentence ids corresponding to cvalue text: " + cValueSentenceIds.size());
+		if(logger.isDebugEnabled()) {
+			logger.info("Number of sentence ids corresponding to cvalue text: " + cValueSentenceIds.size());
+		}
 		if(cValueSentenceIds.size() > 0) {
 			List<Sentence> sentences = sentenceRepository.getSentenceById(cValueSentenceIds);
 			sentences = sentences.stream().filter(s -> s.getScore() != null).collect(Collectors.toList());
@@ -68,7 +69,9 @@ public class TellMeQuestionHandler implements QuestionHandler {
 			} 
 		} else { // Look up Name Entity
 			Set<Long> neSentenceIds = this.nePhraseNodeDao.getSentenceIdsContainingNameEntity(aboutParameter);
-			logger.info("Number of name entity related sentences: " + neSentenceIds.size());
+			if(logger.isDebugEnabled()) {
+				logger.info("Number of name entity related sentences: " + neSentenceIds.size());
+			}
 			List<Sentence> sentences = sentenceRepository.getSentenceById(neSentenceIds);
 			sentences = sentences.stream().filter(s -> s.getScore() != null).collect(Collectors.toList());
 			Collections.sort(sentences, new Comparator<Sentence>() {
@@ -84,7 +87,7 @@ public class TellMeQuestionHandler implements QuestionHandler {
 				for(Sentence sentence : sentences) {
 					if(sentence.getScore() > score) {
 						score = sentence.getScore();
-						logger.info("Sentence Id: " + sentence.getId());
+						logger.debug("Sentence Id: " + sentence.getId());
 						candidates.add(sentence.getText());
 					}
 				}

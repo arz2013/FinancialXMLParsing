@@ -93,7 +93,9 @@ public class WhenQuestionHandler implements QuestionHandler, ApplicationContextA
 						String company = "";
 						while(rels.hasNext()) {
 							Relationship rel = rels.next();
-							logger.info(rel.getProperty("dependency").toString());
+							if(logger.isDebugEnabled()) {
+								logger.info(rel.getProperty("dependency").toString());
+							}
 							if(rel.getProperty("dependency").equals("prep_in") || rel.getProperty("dependency").equals("prep_on")) {
 								if(rel.getEndNode().getProperty("neTag").equals(NeTags.DATE.name())) {
 									dateString = QAUtils.getPhrase(rel.getEndNode());
@@ -107,7 +109,6 @@ public class WhenQuestionHandler implements QuestionHandler, ApplicationContextA
 								company = QAUtils.getPhrase(rel.getEndNode());
 							} else if(rel.getProperty("dependency").equals("prep_of")) {
 								company = QAUtils.getPhrase(rel.getEndNode());
-								logger.info(company);
 							}
 						}
 						

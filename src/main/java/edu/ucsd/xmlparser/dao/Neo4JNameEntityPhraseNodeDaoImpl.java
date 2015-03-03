@@ -6,12 +6,9 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import org.neo4j.cypher.CypherException;
 import org.neo4j.cypher.javacompat.ExecutionEngine;
 import org.neo4j.cypher.javacompat.ExecutionResult;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Transaction;
-
 
 public class Neo4JNameEntityPhraseNodeDaoImpl implements
 		NameEntityPhraseNodeDao {

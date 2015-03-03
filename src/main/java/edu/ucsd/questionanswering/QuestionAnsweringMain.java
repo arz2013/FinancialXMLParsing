@@ -13,6 +13,7 @@ public class QuestionAnsweringMain {
 		ApplicationContext ctx = SystemApplicationContext.getApplicationContext();
 		QuestionAnsweringModule qaModule = QuestionAnsweringModule.class.cast(ctx.getBean("questionAnsweringModule"));
 		logger.info(qaModule.answer("Tell me about Walt Disney.").toString());
+		logger.info(qaModule.answer("When did Disney acquire Das Vierte?").toString());
 
 		//logger.info(qaModule.answer("When did Disney sell Miramax?").toString());
 		// Questions that we can answer

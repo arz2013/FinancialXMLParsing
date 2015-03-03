@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import edu.ucsd.xmlparser.dao.NameEntityPhraseNodeDao;
 import edu.ucsd.xmlparser.entity.Sentence;
 import edu.ucsd.xmlparser.repository.CValueRepository;
-import edu.ucsd.xmlparser.repository.NameEntityPhraseNodeRepository;
 import edu.ucsd.xmlparser.repository.SentenceRepository;
 
 public class TellMeQuestionHandler implements QuestionHandler {

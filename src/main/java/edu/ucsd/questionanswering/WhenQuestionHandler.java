@@ -21,12 +21,12 @@ import org.springframework.data.neo4j.support.Neo4jTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
 import edu.ucsd.wordnet.LexicalUtility;
+import edu.ucsd.xmlparser.dao.NameEntityPhraseNodeDao;
 import edu.ucsd.xmlparser.entity.ApplicationRelationshipType;
 import edu.ucsd.xmlparser.entity.NeTags;
 import edu.ucsd.xmlparser.entity.PhraseTypes;
 import edu.ucsd.xmlparser.entity.Word;
 import edu.ucsd.xmlparser.repository.DocumentRepository;
-import edu.ucsd.xmlparser.repository.NameEntityPhraseNodeRepository;
 import edu.ucsd.xmlparser.repository.SentenceRepository;
 import edu.ucsd.xmlparser.util.Neo4jUtils;
 
@@ -52,7 +52,7 @@ public class WhenQuestionHandler implements QuestionHandler, ApplicationContextA
 	private SentenceRepository sentenceRepository;
 	
 	@Inject
-	private NameEntityPhraseNodeRepository neRepository;
+	private NameEntityPhraseNodeDao neRepository;
 	
 	@Inject
 	private Neo4jTemplate template;

@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
+import edu.ucsd.xmlparser.dao.NameEntityPhraseNodeDao;
 import edu.ucsd.xmlparser.entity.Sentence;
 import edu.ucsd.xmlparser.repository.CValueRepository;
 import edu.ucsd.xmlparser.repository.NameEntityPhraseNodeRepository;
@@ -28,7 +29,7 @@ public class TellMeQuestionHandler implements QuestionHandler {
 	private SentenceRepository sentenceRepository;
 	
 	@Inject
-	private NameEntityPhraseNodeRepository neRepository;
+	private NameEntityPhraseNodeDao nePhraseNodeDao;
 	
 	@Override
 	@Transactional
@@ -42,7 +43,7 @@ public class TellMeQuestionHandler implements QuestionHandler {
 		if(logger.isDebugEnabled()) {
 			logger.debug("Parameter: " + aboutParameter);
 		}
-		
+		logger.info("Parameter: " + aboutParameter);
 		Set<Long> cValueSentenceIds = cValueRepository.getSentenceIds(aboutParameter);
 		logger.info("Number of sentence ids corresponding to cvalue text: " + cValueSentenceIds.size());
 		if(cValueSentenceIds.size() > 0) {
@@ -67,7 +68,8 @@ public class TellMeQuestionHandler implements QuestionHandler {
 				answer = new SetAnswer(candidates);
 			} 
 		} else { // Look up Name Entity
-			Set<Long> neSentenceIds = neRepository.getSentenceIdsContainingNameEntity(aboutParameter);
+			Set<Long> neSentenceIds = this.nePhraseNodeDao.getSentenceIdsContainingNameEntity(aboutParameter);
+			logger.info("Number of name entity related sentences: " + neSentenceIds.size());
 			List<Sentence> sentences = sentenceRepository.getSentenceById(neSentenceIds);
 			sentences = sentences.stream().filter(s -> s.getScore() != null).collect(Collectors.toList());
 			Collections.sort(sentences, new Comparator<Sentence>() {
@@ -83,6 +85,7 @@ public class TellMeQuestionHandler implements QuestionHandler {
 				for(Sentence sentence : sentences) {
 					if(sentence.getScore() > score) {
 						score = sentence.getScore();
+						logger.info("Sentence Id: " + sentence.getId());
 						candidates.add(sentence.getText());
 					}
 				}

@@ -44,6 +44,7 @@
     <bean name="shortestPhraseFunction" class="edu.ucsd.query.function.ShortestPhrase" scope="prototype"/>
   	<bean name="queryFunctionDao" class="edu.ucsd.query.dao.Neo4JQueryFunctionDaoImpl"/>
     <bean name="sentenceDao" class="edu.ucsd.xmlparser.dao.Neo4JSentenceDaoImpl"/>
+    <bean name="nameEntityPhraseNodeDao" class="edu.ucsd.xmlparser.dao.Neo4JNameEntityPhraseNodeDaoImpl"/>
  	
  	<bean name="queryManagerInner" class="edu.ucsd.query.QueryManager.QueryManagerInnerImpl"/>
  	

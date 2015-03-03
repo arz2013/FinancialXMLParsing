@@ -37,16 +37,10 @@ public class Neo4JNameEntityPhraseNodeDaoImpl implements
 		
 		Set<Long> finalResult = new HashSet<Long>();
 		
-		ExecutionResult result;
-		try ( Transaction ignored = graphDatabaseService.beginTx() )
-		{
-		    result = engine.execute(sb.toString());
-		    Iterator<Long> n_column = result.columnAs( "sid" );
-		    while(n_column.hasNext()) {
-		    	finalResult.add(n_column.next());
-		    }
-		} catch(CypherException ce) {
-			ce.printStackTrace();
+		ExecutionResult result = engine.execute(sb.toString());
+		Iterator<Long> n_column = result.columnAs( "sid" );
+		while(n_column.hasNext()) {
+			finalResult.add(n_column.next());
 		}
 		
 		return finalResult;
@@ -64,18 +58,12 @@ public class Neo4JNameEntityPhraseNodeDaoImpl implements
 		
 		Set<Long> finalResult = new HashSet<Long>();
 		
-		ExecutionResult result;
-		try ( Transaction ignored = graphDatabaseService.beginTx() )
-		{
-		    result = engine.execute(sb.toString());
-		    Iterator<Long> n_column = result.columnAs( "sid" );
-		    while(n_column.hasNext()) {
-		    	finalResult.add(n_column.next());
-		    }
-		} catch(CypherException ce) {
-			ce.printStackTrace();
+		ExecutionResult result = engine.execute(sb.toString());
+		Iterator<Long> n_column = result.columnAs( "sid" );
+		while(n_column.hasNext()) {
+			finalResult.add(n_column.next());
 		}
-		
+			
 		return finalResult;
 	}
 

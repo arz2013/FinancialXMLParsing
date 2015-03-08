@@ -30,7 +30,7 @@ public class NNSSentenceFormHandler implements SentenceFormHandler {
 				String phrase = "";
 				StringBuilder sb = new StringBuilder();
 				Node endNode = rel.getEndNode();
-				if(NeTags.isOrganizationOrPerson((String)endNode.getProperty("neTag"))) {
+				if(searchTag.name().equals((String)endNode.getProperty("neTag"))) {
 					sb.append((String)endNode.getProperty("text"));
 					phrase = QAUtils.getPhrase(endNode);
 				} 

@@ -1,5 +1,6 @@
 package edu.ucsd.questionanswering;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -20,6 +21,7 @@ import edu.ucsd.xmlparser.repository.SentenceRepository;
 
 public class TellMeQuestionHandler implements QuestionHandler {
 	private static Logger logger = LoggerFactory.getLogger(TellMeQuestionHandler.class);
+	private static int MAX_RETURN = 3;
 
 	@Inject
 	private CValueRepository cValueRepository;
@@ -49,23 +51,8 @@ public class TellMeQuestionHandler implements QuestionHandler {
 		if(cValueSentenceIds.size() > 0) {
 			List<Sentence> sentences = sentenceRepository.getSentenceById(cValueSentenceIds);
 			sentences = sentences.stream().filter(s -> s.getScore() != null).collect(Collectors.toList());
-			Collections.sort(sentences, new Comparator<Sentence>() {
-				@Override
-				// Sort in descending order
-				public int compare(Sentence o1, Sentence o2) {
-					return o2.getScore().compareTo(o1.getScore());
-				}
-			});
 			if(sentences.size() > 0) {
-				Double score = -1.0;
-				Set<String> candidates = new HashSet<String>();
-				for(Sentence sentence : sentences) {
-					if(sentence.getScore() > score) {
-						score = sentence.getScore();
-						candidates.add(sentence.getText());
-					}
-				}
-				answer = new SetAnswer(candidates);
+				answer = new ListAnswer(generateTopNAnswers(sentences, MAX_RETURN));
 			} 
 		} else { // Look up Name Entity
 			Set<Long> neSentenceIds = this.nePhraseNodeDao.getSentenceIdsContainingNameEntity(aboutParameter);
@@ -74,24 +61,8 @@ public class TellMeQuestionHandler implements QuestionHandler {
 			}
 			List<Sentence> sentences = sentenceRepository.getSentenceById(neSentenceIds);
 			sentences = sentences.stream().filter(s -> s.getScore() != null).collect(Collectors.toList());
-			Collections.sort(sentences, new Comparator<Sentence>() {
-				@Override
-				// Sort in descending order
-				public int compare(Sentence o1, Sentence o2) {
-					return o2.getScore().compareTo(o1.getScore());
-				}
-			});
 			if(sentences.size() > 0) {
-				Double score = -1.0;
-				Set<String> candidates = new HashSet<String>();
-				for(Sentence sentence : sentences) {
-					if(sentence.getScore() > score) {
-						score = sentence.getScore();
-						logger.debug("Sentence Id: " + sentence.getId());
-						candidates.add(sentence.getText());
-					}
-				}
-				answer = new SetAnswer(candidates);
+				answer = new ListAnswer(generateTopNAnswers(sentences, MAX_RETURN));
 			}
 		}
 		
@@ -107,6 +78,34 @@ public class TellMeQuestionHandler implements QuestionHandler {
 		}
 		return sb.toString().trim();
 	}
+	
+	private List<String> generateTopNAnswers(List<Sentence> sentences, int n) {
+		Collections.sort(sentences, new Comparator<Sentence>() {
+			@Override
+			// Sort in descending order
+			public int compare(Sentence o1, Sentence o2) {
+				return o2.getScore().compareTo(o1.getScore());
+			}
+		});
+		
+		Set<String> strings = new HashSet<String>();
+		List<String> answers = new ArrayList<String>();
+		
+		for(Sentence sentence : sentences) {
+			if(answers.size() > n) {
+				break;
+			} else {
+				String text = sentence.getText();
+				if(!strings.contains(text)) {
+					answers.add(text);
+				}
+				strings.add(text);
+			}
+		}
+		
+		return answers;
+	}
+	
 
 	private boolean invalidForm(List<ParsedWord> parsedQuestion) {
 		String firstWord = parsedQuestion.get(0).getWord().toLowerCase();

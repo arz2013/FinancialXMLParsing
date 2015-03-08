@@ -20,7 +20,7 @@ public class NNSSentenceFormHandler implements SentenceFormHandler {
 	private Neo4jTemplate template;
 	
 	@Override
-	public Answer handleWord(Word word) {
+	public Answer handleWord(Word word, NeTags searchTag) {
 		Set<String> answers = new HashSet<String>();
 		Node node = template.getNode(word.getId());
 		Iterator<Relationship> relationships = node.getRelationships(Direction.OUTGOING, ApplicationRelationshipType.WORD_DEPENDENCY).iterator();
@@ -41,7 +41,7 @@ public class NNSSentenceFormHandler implements SentenceFormHandler {
 						Relationship singleRel = rels.next();
 						if("conj_and".equals(singleRel.getProperty("dependency")) || "nn".equals(singleRel.getProperty("dependency"))) {
 							Node endN = singleRel.getEndNode();
-							if(NeTags.isOrganizationOrPerson((String)endN.getProperty("neTag"))) {
+							if(searchTag.name().equals((String)endN.getProperty("neTag"))) {
 								sb.append(" ");
 								sb.append((String)endN.getProperty("text"));
 								phrase = QAUtils.getPhrase(endNode);

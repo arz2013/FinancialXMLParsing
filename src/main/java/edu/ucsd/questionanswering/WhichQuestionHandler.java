@@ -81,7 +81,7 @@ public class WhichQuestionHandler implements QuestionHandler, ApplicationContext
 					String handlerName = sentenceFormTypeToHandler.get(word.getPosTag());
 					if(handlerName != null) {
 						SentenceFormHandler sentenceHandler = SentenceFormHandler.class.cast(this.context.getBean(handlerName));
-						answers.add(sentenceHandler.handleWord(word));
+						answers.add(sentenceHandler.handleWord(word, NeTags.fromString(answerNameEntityType)));
 					} else {
 						logger.info("No handler for : " + word);
 					}

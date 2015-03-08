@@ -24,7 +24,7 @@ public class VerbSentenceFormHandler implements SentenceFormHandler {
 	private static Logger logger = LoggerFactory.getLogger(VerbSentenceFormHandler.class);
 	
 	@Override
-	public Answer handleWord(Word word) {
+	public Answer handleWord(Word word, NeTags searchTag) {
 		Set<String> answers = new HashSet<String>();
 		Node node = template.getNode(word.getId());
 		Iterator<Relationship> relationships = node.getRelationships(Direction.OUTGOING, ApplicationRelationshipType.WORD_DEPENDENCY).iterator();
@@ -34,7 +34,7 @@ public class VerbSentenceFormHandler implements SentenceFormHandler {
 				StringBuilder sb = new StringBuilder();
 				String phrase = "";
 				Node endNode = rel.getEndNode();
-				if(NeTags.isOrganizationOrPerson((String)endNode.getProperty("neTag"))) {
+				if(searchTag.name().equals((String)endNode.getProperty("neTag"))) {
 					phrase = QAUtils.getPhrase(endNode);
 					sb.append((String)endNode.getProperty("text"));
 					appendRelationship(endNode, sb, "appos");

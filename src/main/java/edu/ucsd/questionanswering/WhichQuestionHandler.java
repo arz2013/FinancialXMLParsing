@@ -60,7 +60,7 @@ public class WhichQuestionHandler implements QuestionHandler, ApplicationContext
 		}
 		
 		// Look for Actor
-		String actor = lookForActor(parsedQuestion, 2);
+		String actor = lookForSubject(parsedQuestion, 2);
 		Long documentId = lookForMostProbablyDocument(actor);
 		
 		List<Answer> answers = new ArrayList<Answer>();
@@ -154,36 +154,39 @@ public class WhichQuestionHandler implements QuestionHandler, ApplicationContext
 		return docIdResult;
 	}
 
-	private String lookForActor(List<ParsedWord> parsedQuestion, int start) {
-		String actor = null;
+	private String lookForSubject(List<ParsedWord> parsedQuestion, int start) {
+		String subject = null;
 		
+		// First we look at the words tagged by the Stanford Parser as an organization or person
 		for(int i = start; i < parsedQuestion.size(); i++) {
 			ParsedWord pw = parsedQuestion.get(i);
 			if(NeTags.isOrganizationOrPerson(pw.getNeTag())) {
-				if(actor == null) {
-					actor = pw.getWord();
+				if(subject == null) {
+					subject = pw.getWord();
 				} else {
-					actor += " ";
-					actor += pw.getWord();
+					subject += " ";
+					subject += pw.getWord();
 				}
 			}
 		}
 		
-		if(actor == null) {
+		// If the Stanford Parser was either unable to find words tagged as an organization/person
+		// we look for the next best thing which are words tagged as NNP
+		if(subject == null) {
 			for(int i = start; i < parsedQuestion.size(); i++) {
 				ParsedWord pw = parsedQuestion.get(i);
 				if("NNP".equals(pw.getPosTag())) {
-					if(actor == null) {
-						actor = pw.getWord();
+					if(subject == null) {
+						subject = pw.getWord();
 					} else {
-						actor += " ";
-						actor += pw.getWord();
+						subject += " ";
+						subject += pw.getWord();
 					}
 				}
 			}	
 		} 
 		
-		return actor.trim();
+		return subject.trim();
 	}
 
 	@Override

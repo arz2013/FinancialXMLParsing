@@ -9,6 +9,8 @@ import javax.inject.Inject;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.neo4j.support.Neo4jTemplate;
 
 import edu.ucsd.xmlparser.entity.ApplicationRelationshipType;
@@ -16,6 +18,8 @@ import edu.ucsd.xmlparser.entity.NeTags;
 import edu.ucsd.xmlparser.entity.Word;
 
 public class NNSSentenceFormHandler implements SentenceFormHandler {
+	private final static Logger logger = LoggerFactory.getLogger(NNSSentenceFormHandler.class);
+	
 	@Inject
 	private Neo4jTemplate template;
 	
@@ -33,7 +37,11 @@ public class NNSSentenceFormHandler implements SentenceFormHandler {
 				if(searchTag.name().equals((String)endNode.getProperty("neTag"))) {
 					sb.append((String)endNode.getProperty("text"));
 					phrase = QAUtils.getPhrase(endNode);
-				} 
+				} else {
+					if(logger.isDebugEnabled()) {
+						logger.debug("Discarding: " + endNode.getProperty("neTag").toString() + " " + endNode.getProperty("text").toString());
+					}
+				}
 				
 				if(phrase.equals("")) {
 					Iterator<Relationship> rels = endNode.getRelationships(Direction.OUTGOING, ApplicationRelationshipType.WORD_DEPENDENCY).iterator();
@@ -50,11 +58,6 @@ public class NNSSentenceFormHandler implements SentenceFormHandler {
 					}
 				}
 				
-				/*
-				String answer = sb.toString().trim();
-				if(!"".equals(answer)) {
-					answers.add(answer);
-				}*/
 				if(!"".equals(phrase)) {
 					answers.add(phrase);
 				}

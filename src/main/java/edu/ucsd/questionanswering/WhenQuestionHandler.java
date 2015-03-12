@@ -14,9 +14,6 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.data.neo4j.support.Neo4jTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,7 +27,7 @@ import edu.ucsd.xmlparser.repository.DocumentRepository;
 import edu.ucsd.xmlparser.repository.SentenceRepository;
 import edu.ucsd.xmlparser.util.Neo4jUtils;
 
-public class WhenQuestionHandler implements QuestionHandler, ApplicationContextAware {
+public class WhenQuestionHandler implements QuestionHandler {
 	private static Map<String, String> sentenceFormTypeToHandler = new HashMap<String, String>();
 
 	private static Logger logger = LoggerFactory.getLogger(WhenQuestionHandler.class);
@@ -57,8 +54,6 @@ public class WhenQuestionHandler implements QuestionHandler, ApplicationContextA
 	@Inject
 	private Neo4jTemplate template;
 	
-	private ApplicationContext applicationContext;
-
 	@Override
 	@Transactional
 	public Answer answerQuestion(List<ParsedWord> parsedQuestion) {
@@ -87,7 +82,6 @@ public class WhenQuestionHandler implements QuestionHandler, ApplicationContextA
 					logger.debug("Number of words: " + words.size());
 					for(Word word : words) {
 						Node node = template.getNode(word.getId());
-						Node sentence = node.getRelationships(Direction.INCOMING, ApplicationRelationshipType.HAS_WORD).iterator().next().getStartNode();
 						Iterator<Relationship> rels = node.getRelationships(Direction.OUTGOING, ApplicationRelationshipType.WORD_DEPENDENCY).iterator();
 						String dateString = "";
 						String company = "";
@@ -230,11 +224,5 @@ public class WhenQuestionHandler implements QuestionHandler, ApplicationContextA
 		} 
 		
 		return actor.trim();
-	}
-
-	@Override
-	public void setApplicationContext(ApplicationContext arg0)
-			throws BeansException {
-		this.applicationContext = arg0;
 	}
 }

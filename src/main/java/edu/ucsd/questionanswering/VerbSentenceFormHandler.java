@@ -45,6 +45,10 @@ public class VerbSentenceFormHandler implements SentenceFormHandler {
 			} 
 		}
 		
+		if(logger.isDebugEnabled()) {
+			logger.debug("Number of answers generated: " + answers.size());
+		}
+		
 		return new SetAnswer(answers);
 	}
 	

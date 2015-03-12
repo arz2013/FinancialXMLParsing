@@ -18,6 +18,13 @@ import simplenlg.framework.WordElement;
 import simplenlg.lexicon.Lexicon;
 import simplenlg.realiser.english.Realiser;
 
+/**
+ * The LexicalUtility class pertains to generating various forms of words and we currently use a WordNet 
+ * utility library to generate past tenses and noun forms of Verbs. 
+ * 
+ * @author rogertan
+ *
+ */
 public class LexicalUtility {
 	private static WordNet wordNet = WordNet.getInstance();
 	private static Lexicon lexicon;

@@ -16,18 +16,14 @@ public class QuestionAnsweringMain {
 		logger.info(qaModule.answer("When did Chevron acquire UCSD?").toString());
 		//logger.info(qaModule.answer("Which organizations did Disney acquire?").toString());
 		//logger.info(qaModule.answer("Which persons did Disney acquire?").toString());
-		//logger.info(qaModule.answer("Which persons did Disney acquire?").toString());
-		// Stanford Parser is unable to determine Lemma 
-		//logger.info(qaModule.answer("Which people did Disney acquire?").toString());
+		
 		//logger.info(qaModule.answer("Tell me about Walt Disney.").toString());
 		logger.info(qaModule.answer("When did Disney acquire Das Vierte?").toString());
 		logger.info(qaModule.answer("When did Chevron acquire Atlas Energy?").toString());
 		logger.info(qaModule.answer("When did Disney sell Miramax?").toString());
-		//logger.info(qaModule.answer("Which organizations did Disney sell?").toString());
-		//logger.info(qaModule.answer("Which organizations did Disney dispose?").toString());
-		//logger.info(qaModule.answer("Which persons did Disney promote?").toString());
-		//logger.info(qaModule.answer("Tell me about The Secret to Life.").toString());
-		//logger.info(qaModule.answer("Which organizations did Chevron acquire?").toString());
+		logger.info(qaModule.answer("Which organizations did Disney sell?").toString());
+		logger.info(qaModule.answer("Tell me about The Secret to Life.").toString());
+		logger.info(qaModule.answer("Which organizations did Chevron acquire?").toString());
 		
 		logger.info(qaModule.answer("Tell me about Chevron.").toString());
 		logger.info(qaModule.answer("Tell me about operating income.").toString());
@@ -51,5 +47,6 @@ public class QuestionAnsweringMain {
 		/*
 		qaModule.answer("What acquisitions did Chevron make?"); // Unable to answer this one
 		*/
+		
 	}
 }

@@ -17,7 +17,6 @@ public class ParserMain {
 	public static void main(String[] args) throws Exception {
 		ApplicationContext context = SystemApplicationContext.getApplicationContext();
 
-		// String[] fileNames = { "ShortenedTestDocument.xml", "ShortenedTestDocument2.xml" };
 		String[] fileNames = { "Annual_Report_Chevron_2013.xml", "Annual_Report_Disney_2013.xml" };
 		List<File> files = new ArrayList<File>();
 		for(String fileName : fileNames) {
@@ -33,6 +32,10 @@ public class ParserMain {
 		logger.info("Calculating Collection Level CValues");
 		CValueDocumentCalculator cValueDocumentCalculator = CValueDocumentCalculator.class.cast(context.getBean("cValueDocumentCalculator"));
 		cValueDocumentCalculator.computeCollectionLevelCValue();
+		
+		logger.info("Performing Sentence Scoring.");
+		SentenceScorer sentenceScorer = SentenceScorer.class.cast(context.getBean("sentenceScorer"));
+		sentenceScorer.scoreSentence();
 	}
 
 }

@@ -1,6 +1,7 @@
 package edu.ucsd.xmlparser;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -27,6 +28,7 @@ import edu.ucsd.nlpparser.StanfordParser;
 import edu.ucsd.xmlparser.entity.ApplicationRelationshipType;
 import edu.ucsd.xmlparser.entity.CValueDocumentNode;
 import edu.ucsd.xmlparser.entity.CValueSectionNode;
+import edu.ucsd.xmlparser.entity.Collection;
 import edu.ucsd.xmlparser.entity.Document;
 import edu.ucsd.xmlparser.entity.NodeName;
 import edu.ucsd.xmlparser.entity.ReferenceType;
@@ -45,8 +47,6 @@ public class FinancialXMLParser {
 	
 	private int sentenceNumber = 0;
 	private int documentNumber = 0;
-
-	private int lengthOfDocument;
 	
 	private static Logger logger = LoggerFactory.getLogger(FinancialXMLParser.class);
 	
@@ -62,28 +62,40 @@ public class FinancialXMLParser {
 	 */
 	@Transactional
 	public void parseAndLoad(File file, int year) throws Exception {
+		// Check if a collection node exists
+		org.neo4j.graphdb.Node documentCollection = getOrCreateCollection();
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		DocumentBuilder db = dbf.newDocumentBuilder(); 
 		Node documentNode = db.parse(file);
 		org.neo4j.graphdb.Node documentGraphNode = graphDatabaseUtils.toDocumentGraphNode(documentNode);
 		Document document = new Document(file.getName(), year, documentNumber);
 		template.save(document);
+		// Create relationship between collection and document
+		graphDatabaseUtils.createRelationship(documentCollection, template.getNode(document.getId()), ApplicationRelationshipType.HAS_DOCUMENT);
 		// Create relationship between document and #document
 		graphDatabaseUtils.createRelationship(template.getNode(document.getId()), documentGraphNode, ApplicationRelationshipType.RELATED_DOCUMENT);
 		Map<String, CValueRawFrequency> termAndFrequency = new HashMap<String, CValueRawFrequency>();
 		visit(documentGraphNode, documentNode, template.getNode(document.getId()), termAndFrequency, null, null);
 		computeCValueAndPersist(termAndFrequency, ReferenceType.DOCUMENT, document);
 		documentNumber++; // Increment for the next document
-		System.out.println("Document Length: " + this.lengthOfDocument);
 	}
 	
+	
+	
+	private org.neo4j.graphdb.Node getOrCreateCollection() {
+		Map<String, Object> props = new HashMap<String, Object>();
+		props.put("key", "collection");
+		List<String> labels = new ArrayList<String>();
+		labels.add(Collection.class.getSimpleName());
+		return template.getOrCreateNode(Collection.class.getSimpleName(), "key", "collection", props, labels);
+	}
+
 	public void reset() {
 		this.sentenceNumber = 0;
-		this.lengthOfDocument = 0;
 	}
 	
 	private void computeCValueAndPersist(Map<String, CValueRawFrequency> termAndFrequency, ReferenceType refType, Document document) {
-		System.out.println("Number of terms raw: " + termAndFrequency.size());
+		logger.info("Number of terms raw: " + termAndFrequency.size());
 		if(termAndFrequency.size() == 0) {
 			return;
 		}
@@ -184,7 +196,6 @@ public class FinancialXMLParser {
 			if(!(rawSentence.startsWith("% Change") && rawSentence.length() > 30 )) {
 				List<Sentence> sentences = stanfordParser.parseAndLoad(hashText.getNodeValue(), this.sentenceNumber, documentTermAndFrequency, document.getId(), sectionId, sectionTermAndFrequency);
 				for(Sentence sentence : sentences) {
-					this.lengthOfDocument += sentence.getText().length();
 					org.neo4j.graphdb.Node sentenceNode = graphDatabaseUtils.getNode(sentence);
 					graphDatabaseUtils.createRelationship(graphNode, sentenceNode, ApplicationRelationshipType.HAS_CHILD);
 					graphDatabaseUtils.createRelationship(document, sentenceNode, ApplicationRelationshipType.HAS_SENTENCE);

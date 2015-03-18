@@ -75,8 +75,7 @@ public class StanfordParser {
 	public void initiate() {
 		Properties props = new Properties();
 		props.put("annotators", "tokenize, sspl"
-				+ "it, pos, lemma, ner, parse"); // Remove dcoref
-		// props.put("dcoref.score", true);
+				+ "it, pos, lemma, ner, parse"); 
 		pipeline = new StanfordCoreNLP(props);
 		
 		List<TokenSequencePattern> patterns = new ArrayList<TokenSequencePattern>();
@@ -114,7 +113,7 @@ public class StanfordParser {
 		pipeline.annotate(document);
 		long endTime = System.currentTimeMillis();
 		
-		System.out.println("Stanford Parsing takes : " + (endTime - startTime) + " ms");
+		logger.info("Stanford Parsing takes : " + (endTime - startTime) + " ms");
 
 		// these are all the sentences in this document
 		// a CoreMap is essentially a Map that uses class objects as keys and has values with custom types
